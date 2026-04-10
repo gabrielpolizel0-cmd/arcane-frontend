@@ -765,7 +765,7 @@ function AppDashboard({ user, onLogout }) {
   const fetchUsage = async () => {
     try {
       const token = localStorage.getItem("arcane_token");
-      const res = await fetch(BACKEND_URL + "/user/usage", {
+      const res = await fetch(BACKEND_URL + "/ai/usage", {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -791,10 +791,10 @@ function AppDashboard({ user, onLogout }) {
     setLoading(true); setResult("");
     try {
       const token = localStorage.getItem("arcane_token");
-      const res = await fetch(BACKEND_URL + "/generate", {
+      const res = await fetch(BACKEND_URL + "/ai/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ tool_id: activeTool.id, prompt: activeTool.prompt, user_input: input }),
+        body: JSON.stringify({ tool: activeTool.id, input: input }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erro ao gerar");
