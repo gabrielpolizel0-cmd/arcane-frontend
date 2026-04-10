@@ -1,0 +1,1987 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>D7 Foundation — Intelligence. Digital Conglomerate. Premium Ecosystem.</title>
+<meta name="description" content="Conglomerado digital premium com módulos em financial intelligence, AI automation, media e cybersecurity. O mundo está mudando. A minoria estará preparada."/>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Space+Mono:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['Space Mono', 'monospace'],
+        code: ['JetBrains Mono', 'monospace'],
+      }
+    }
+  }
+}
+</script>
+
+<!-- Iconify -->
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.1.0/dist/iconify-icon.min.js"></script>
+
+<style>
+/* ========== DESIGN TOKENS ========== */
+:root {
+  --bg-page:        #050505;
+  --bg-surface:     #0A0A0A;
+  --bg-card:        #111111;
+  --bg-elevated:    #1a1a1a;
+
+  --accent:         #01bbff;
+  --accent-hover:   #ffffff;
+  --accent-glow:    rgba(1, 187, 255, 0.3);
+  --accent-dim:     rgba(1, 187, 255, 0.15);
+
+  --text-primary:   #EAEAEA;
+  --text-secondary: #999999;
+  --text-muted:     #6B7280;
+
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-emphasis:rgba(255, 255, 255, 0.15);
+
+  --glass-bg:       rgba(255, 255, 255, 0.04);
+  --glass-bg-strong:rgba(255, 255, 255, 0.08);
+  --glass-blur:     12px;
+
+  --shadow-card:    0 0 30px rgba(1, 187, 255, 0.12);
+  --shadow-glow:    0 0 20px rgba(1, 187, 255, 0.4);
+}
+
+/* ========== RESET & BASE ========== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { font-size: 16px; }
+
+body {
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection { background: var(--accent); color: #000; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-page); }
+::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ========== PARTICLES BACKGROUND ========== */
+#particles-js {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(circle at 20% 20%, #000203, #000);
+}
+
+#particles-js canvas {
+  pointer-events: none;
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes animationIn {
+  0%   { opacity: 0; transform: translateY(30px); filter: blur(10px); }
+  100% { opacity: 1; transform: translateY(0);    filter: blur(0px);  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 4px var(--accent), 0 0 8px var(--accent-glow); }
+  50%       { box-shadow: 0 0 8px var(--accent), 0 0 20px var(--accent-glow); }
+}
+
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes shimmer {
+  0%   { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%)  skewX(-15deg); }
+}
+
+/* Scroll-reveal paused by default, triggered by JS */
+.animate-on-scroll { animation-play-state: paused !important; }
+.animate-on-scroll.animate { animation-play-state: running !important; }
+
+/* Hero: runs immediately on page load */
+.animate-in { animation: animationIn 0.8s ease-out both; }
+
+/* Utility dots */
+.pulse-dot { animation: pulseGlow 2s ease-in-out infinite; }
+
+/* ========== NAV ========== */
+.ds-nav {
+  position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
+  background: rgba(5, 5, 5, 0.85);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+.ds-nav.scrolled {
+  background: rgba(5, 5, 5, 0.96);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.nav-link {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: #666; padding: 6px 14px; border-radius: 0;
+  white-space: nowrap; transition: all 0.2s; text-decoration: none; font-weight: 500;
+}
+.nav-link:hover  { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+.nav-link.active { background: var(--accent); color: #000; }
+
+.glass-badge {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 0;
+  padding: 4px 14px;
+}
+
+/* ========== HERO TYPOGRAPHY ========== */
+.hero-display {
+  font-size: clamp(1.9rem, 5.5vw, 4.5rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  font-weight: 300;
+}
+.hero-stroke {
+  color: rgba(255, 255, 255, 0.38);
+  font-weight: 300;
+}
+.hero-accent { color: var(--accent); font-weight: 700; }
+
+/* ========== BUTTONS — Brutalista Sharp ========== */
+
+/* PRIMARY — Rotating White Border + Bottom Glow */
+.btn-primary {
+  position: relative; isolation: isolate; overflow: hidden;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-width: 180px; height: 50px; padding: 0 28px;
+  background: rgba(255,255,255,0.05); color: #fff;
+  border: none; border-radius: 0;
+  font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em;
+  cursor: pointer; white-space: nowrap;
+  transition: box-shadow 0.3s, transform 0.1s;
+}
+/* Rotating border — conic white sweeps around */
+.btn-primary::before {
+  content: '';
+  position: absolute; inset: -150%;
+  background: conic-gradient(from 0deg, transparent 0deg, transparent 295deg, rgba(255,255,255,0.85) 325deg, rgba(255,255,255,0.85) 360deg);
+  animation: spin 4s linear infinite;
+  z-index: -2;
+}
+/* Inset black fill sits above the border */
+.btn-primary::after {
+  content: '';
+  position: absolute; inset: 1px;
+  background: #080808;
+  z-index: -1;
+}
+.btn-primary:hover {
+  box-shadow: 0 16px 48px rgba(255,255,255,0.12), 0 6px 80px rgba(255,255,255,0.06);
+}
+.btn-primary:active { transform: scale(0.95); }
+
+/* SECONDARY — Zinc-800 bg fades, Cyan beam appears on hover */
+.btn-secondary {
+  position: relative; isolation: isolate; overflow: hidden;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-width: 180px; height: 50px; padding: 0 28px;
+  background: rgb(39,39,42); color: var(--text-primary);
+  border: none; border-radius: 0;
+  font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em;
+  cursor: pointer; white-space: nowrap;
+  transition: background 0.35s, box-shadow 0.35s, color 0.25s;
+}
+/* Cyan conic beam — hidden until hover */
+.btn-secondary::before {
+  content: '';
+  position: absolute; inset: -150%;
+  background: conic-gradient(from 0deg, transparent 0deg, transparent 295deg, #01bbff 325deg, #01bbff 360deg);
+  animation: spin 3s linear infinite;
+  opacity: 0; transition: opacity 0.35s;
+  z-index: -2;
+}
+/* Inset black fill */
+.btn-secondary::after {
+  content: '';
+  position: absolute; inset: 1px;
+  background: #080808;
+  z-index: -1;
+}
+.btn-secondary:hover {
+  background: transparent; color: var(--accent);
+  box-shadow: 0 12px 40px rgba(1,187,255,0.2), 0 4px 60px rgba(1,187,255,0.08);
+}
+.btn-secondary:hover::before { opacity: 1; }
+.btn-secondary:active { transform: scale(0.95); }
+
+/* ========== MARQUEE ========== */
+.marquee-track { animation: marqueeScroll 28s linear infinite; }
+
+.marquee-text {
+  font-size: clamp(1.8rem, 4.5vw, 3.2rem);
+  text-transform: uppercase; letter-spacing: -0.02em; font-weight: 600;
+  -webkit-text-stroke: 1px rgba(255,255,255,0.2);
+  color: transparent; white-space: nowrap;
+}
+.marquee-separator {
+  color: var(--accent);
+  font-size: clamp(1.8rem, 4.5vw, 3.2rem);
+  font-weight: 600;
+}
+
+/* ========== CAROUSEL SECTION ========== */
+.carousel-section { position: relative; padding: 80px 0 60px; }
+
+.carousel-header {
+  max-width: 1800px; margin: 0 auto;
+  padding: 0 32px 48px;
+}
+@media (max-width: 768px) { .carousel-header { padding: 0 16px 32px; } }
+
+/* ========== SLIDER ========== */
+.slider-container {
+  display: flex; overflow-x: auto;
+  scroll-snap-type: x mandatory; scroll-behavior: smooth;
+  gap: 20px; padding: 8px 24px 24px;
+  -ms-overflow-style: none; scrollbar-width: none;
+  mask-image: linear-gradient(90deg, transparent, black 3%, black 97%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 3%, black 97%, transparent);
+}
+.slider-container::-webkit-scrollbar { display: none; }
+@media (min-width: 768px) { .slider-container { gap: 28px; padding: 8px 48px 24px; } }
+
+/* ========== SLIDE CARD ========== */
+.slide-card {
+  flex-shrink: 0;
+  width: 82vw; max-width: 460px;
+  aspect-ratio: 3 / 4;
+  scroll-snap-align: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+.slide-card:hover {
+  border-color: rgba(1, 187, 255, 0.25);
+  box-shadow: 0 0 40px rgba(1, 187, 255, 0.07);
+}
+@media (min-width: 640px) { .slide-card { width: 85vw; } }
+
+.slide-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 24px 24px 0;
+}
+@media (min-width: 768px) { .slide-header { padding: 30px 30px 0; } }
+
+.slide-content {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 20px 24px; justify-content: flex-end;
+}
+@media (min-width: 768px) { .slide-content { padding: 24px 30px; } }
+
+.slide-footer {
+  padding: 14px 24px 22px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: flex; justify-content: space-between; align-items: center;
+}
+@media (min-width: 768px) { .slide-footer { padding: 18px 30px 28px; } }
+
+/* Card backgrounds */
+.slide-bg-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+}
+
+.slide-bg-glow {
+  position: absolute; width: 280px; height: 280px;
+  border-radius: 50%; filter: blur(90px);
+  pointer-events: none;
+}
+
+/* Accent card variant */
+.slide-card.accent-card {
+  background: linear-gradient(140deg, #01bbff, #0077cc 60%, #004e99);
+  border-color: rgba(1, 187, 255, 0.6);
+  color: #000;
+}
+.slide-card.accent-card:hover { box-shadow: 0 0 50px rgba(1, 187, 255, 0.25); }
+
+/* ── LOCKED SLIDE STATE ── */
+/* ── LOCKED STATE ── */
+.slide-card.locked {
+  cursor: default;
+  transition: border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+/* Hover: borda cyan sutil + glow */
+.slide-card.locked:hover {
+  border-color: rgba(1,187,255,0.2);
+  box-shadow: 0 0 32px rgba(1,187,255,0.06), inset 0 0 40px rgba(1,187,255,0.03);
+  transform: none;
+}
+
+/* Conteúdo por baixo — blur + opacidade */
+.slide-card.locked .slide-content,
+.slide-card.locked .slide-footer,
+.slide-card.locked .slide-header {
+  filter: blur(2px);
+  opacity: 0.35;
+  pointer-events: none;
+  user-select: none;
+  transition: filter 0.4s ease, opacity 0.4s ease;
+}
+
+/* No hover, o conteúdo fica ainda mais escurecido */
+.slide-card.locked:hover .slide-content,
+.slide-card.locked:hover .slide-footer,
+.slide-card.locked:hover .slide-header {
+  filter: blur(3px);
+  opacity: 0.2;
+}
+
+/* Overlay base */
+.slide-lock-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(5,5,5,0.45);
+  transition: background 0.4s ease;
+  overflow: hidden;
+}
+
+/* Hover: overlay mais escuro */
+.slide-card.locked:hover .slide-lock-overlay {
+  background: rgba(5,5,5,0.65);
+}
+
+/* Scan line que percorre o card de cima pra baixo no hover */
+.slide-lock-overlay::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(1,187,255,0.0) 10%,
+    rgba(1,187,255,0.5) 50%,
+    rgba(1,187,255,0.0) 90%,
+    transparent 100%
+  );
+  top: -2px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  animation: none;
+}
+.slide-card.locked:hover .slide-lock-overlay::before {
+  opacity: 1;
+  animation: lockScanLine 1.8s linear infinite;
+}
+
+/* Lock icon box */
+.slide-lock-icon {
+  width: 48px; height: 48px;
+  border: 1px solid rgba(255,255,255,0.12);
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.6);
+  position: relative; z-index: 2;
+  transition: border-color 0.4s ease, background 0.4s ease, transform 0.3s ease;
+}
+
+/* Hover: cadeado fica mais visível e levanta */
+.slide-card.locked:hover .slide-lock-icon {
+  border-color: rgba(1,187,255,0.4);
+  background: rgba(1,187,255,0.08);
+  transform: translateY(-3px);
+}
+
+/* Badge "Em Breve" */
+.slide-lock-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.35);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 5px 14px;
+  background: rgba(0,0,0,0.5);
+  position: relative; z-index: 2;
+  transition: color 0.4s ease, border-color 0.4s ease, letter-spacing 0.4s ease;
+}
+
+/* Hover: badge com cor cyan e letra-spacing expandido */
+.slide-card.locked:hover .slide-lock-badge {
+  color: rgba(1,187,255,0.7);
+  border-color: rgba(1,187,255,0.25);
+  letter-spacing: 0.3em;
+}
+
+/* Keyframes */
+@keyframes lockPulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.8; }
+}
+@keyframes lockScanLine {
+  0%   { top: -2px; }
+  100% { top: 102%; }
+}
+/* Lock icon pulsa levemente no estado normal */
+.slide-lock-icon {
+  animation: lockPulse 3s ease-in-out infinite;
+}
+/* Para a animação de pulse no hover (substitui pelo spin externo) */
+.slide-card.locked:hover .slide-lock-icon {
+  animation: none;
+}
+
+/* Typography inside cards */
+.slide-number {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.15em;
+}
+.slide-category {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.15em; color: rgba(255,255,255,0.35);
+}
+.slide-title {
+  font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+  font-weight: 700; letter-spacing: -0.03em; line-height: 0.95;
+}
+.slide-subtitle {
+  font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+  font-weight: 700; letter-spacing: -0.03em; line-height: 0.95;
+  color: rgba(255,255,255,0.3);
+}
+.slide-description {
+  font-family: 'Space Mono', monospace; font-size: 11px;
+  color: rgba(255,255,255,0.45); line-height: 1.65;
+  border-left: 2px solid var(--accent); padding-left: 12px;
+  max-width: 92%;
+}
+.slide-tag {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.1em; padding: 4px 11px; border-radius: 9999px;
+  border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.6);
+  font-family: 'Inter', sans-serif; transition: all 0.25s;
+}
+.slide-tag:hover { border-color: var(--accent); color: var(--accent); }
+.slide-tag.accent { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+
+.slide-icon-box {
+  width: 46px; height: 46px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(8px);
+}
+.slide-cta {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: rgba(255,255,255,0.9); color: #000;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s; cursor: pointer; text-decoration: none;
+}
+.slide-cta:hover { transform: scale(1.1); background: var(--accent); }
+
+.slide-cta-full {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 13px 26px; border-radius: 0;
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; transition: all 0.3s; cursor: pointer;
+  border: none;
+}
+.slide-cta-full.white { background: #fff; color: #000; }
+.slide-cta-full.white:hover { background: rgba(255,255,255,0.9); transform: translateY(-1px); }
+.slide-cta-full.accent-dark { background: rgba(0,0,0,0.75); color: var(--accent); backdrop-filter: blur(8px); }
+.slide-cta-full.accent-dark:hover { background: #000; transform: translateY(-1px); }
+
+.slide-feature {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 12px; color: rgba(255,255,255,0.55); font-family: 'Inter', sans-serif;
+}
+.slide-feature iconify-icon { color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+
+/* Accent card text overrides */
+.accent-card .slide-number  { color: rgba(0,0,0,0.45); }
+.accent-card .slide-category { color: rgba(0,0,0,0.45); }
+.accent-card .slide-title   { color: #000; }
+.accent-card .slide-subtitle { color: rgba(0,0,0,0.35); }
+.accent-card .slide-description { color: rgba(0,0,0,0.6); border-left-color: rgba(0,0,0,0.35); }
+.accent-card .slide-tag     { color: rgba(0,0,0,0.7); border-color: rgba(0,0,0,0.25); }
+.accent-card .slide-tag.accent { background: #000; color: var(--accent); border-color: #000; }
+.accent-card .slide-icon-box { background: rgba(0,0,0,0.12); border-color: rgba(0,0,0,0.2); }
+.accent-card .slide-footer  { border-top-color: rgba(0,0,0,0.12); }
+.accent-card .slide-feature { color: rgba(0,0,0,0.65); }
+.accent-card .slide-feature iconify-icon { color: rgba(0,0,0,0.7); }
+.accent-card .slide-cta     { background: rgba(0,0,0,0.8); color: var(--accent); }
+.accent-card .slide-cta:hover { background: #000; }
+
+/* ========== CAROUSEL NAV ========== */
+.carousel-nav {
+  max-width: 1800px; margin: 0 auto;
+  padding: 20px 32px 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
+@media (max-width: 768px) { .carousel-nav { padding: 16px 16px 0; } }
+
+.carousel-dots { display: flex; align-items: center; gap: 7px; }
+.carousel-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  transition: all 0.3s; cursor: pointer; border: none; padding: 0;
+}
+.carousel-dot:hover { background: rgba(255,255,255,0.35); }
+.carousel-dot.active {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+  transform: scale(1.2);
+}
+
+.carousel-arrows { display: flex; align-items: center; gap: 8px; }
+.carousel-arrow {
+  width: 42px; height: 42px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(10,10,10,0.8);
+  color: rgba(255,255,255,0.45);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.3s;
+  backdrop-filter: blur(8px);
+}
+.carousel-arrow:hover {
+  border-color: rgba(255,255,255,0.25); color: #fff;
+  background: rgba(255,255,255,0.04);
+}
+.carousel-arrow:disabled { opacity: 0.2; cursor: default; pointer-events: none; }
+
+.swipe-hint {
+  display: flex; align-items: center; gap: 5px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  color: rgba(255,255,255,0.25); text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ========== STATUS BAR ========== */
+.status-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+  background: rgba(5,5,5,0.92); backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding: 8px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  color: #444; text-transform: uppercase; letter-spacing: 0.1em;
+}
+.status-dot {
+  width: 5px; height: 5px; border-radius: 50%; background: #00cc66; display: inline-block;
+  animation: pulseGlow 2s ease-in-out infinite;
+  box-shadow: 0 0 4px #00cc66, 0 0 8px rgba(0,204,102,0.3);
+}
+@media (max-width: 768px) {
+  .status-bar { display: none; }
+  .carousel-arrows { display: none; }
+}
+
+/* ========== METRICS SECTION ========== */
+
+/* Glass stat card */
+.stat-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid rgba(255,255,255,0.1);
+  position: relative; overflow: hidden;
+  padding: 32px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.stat-card::before {
+  content: "";
+  position: absolute; inset: 0;
+  border: 1px solid rgba(255,255,255,0.4);
+  mask-image: linear-gradient(135deg, white, transparent 55%);
+  -webkit-mask-image: linear-gradient(135deg, white, transparent 55%);
+  pointer-events: none;
+}
+.stat-card:hover {
+  border-color: rgba(1,187,255,0.25);
+  box-shadow: var(--shadow-card);
+}
+
+/* Flashlight hover effect */
+.flashlight-card { cursor: default; }
+.flashlight-card::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(1, 187, 255, 0.07),
+    transparent 40%
+  );
+  opacity: 0; transition: opacity 0.5s;
+  pointer-events: none; z-index: 1;
+}
+.flashlight-card:hover::after { opacity: 1; }
+
+/* Chart card */
+.chart-card {
+  background: var(--bg-surface);
+  border: 1px solid rgba(255,255,255,0.07);
+  padding: 24px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.3s ease;
+}
+.chart-card:hover { border-color: rgba(255,255,255,0.14); }
+
+/* Glass divider */
+.glass-divider-h {
+  height: 1px;
+  background-image: linear-gradient(90deg,
+    transparent,
+    rgba(255,255,255,0.2) 20%,
+    rgba(255,255,255,0.35) 50%,
+    rgba(255,255,255,0.2) 80%,
+    transparent
+  );
+}
+
+/* AXIS chart animations */
+.draw-path {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: dash 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.grow-bar {
+  transform-origin: bottom;
+  transform: scaleY(0);
+  animation: grow 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.fade-in-chart {
+  opacity: 0;
+  animation: fadeChart 1s ease forwards;
+}
+@keyframes dash        { to { stroke-dashoffset: 0; } }
+@keyframes grow        { to { transform: scaleY(1); } }
+@keyframes fadeChart   { to { opacity: 1; } }
+
+
+
+.interface-panel {
+  background: var(--bg-surface);
+  border: 1px solid rgba(255,255,255,0.07);
+  padding: 28px;
+  display: flex; flex-direction: column; gap: 20px;
+  transition: border-color 0.3s ease;
+}
+.interface-panel:hover { border-color: rgba(255,255,255,0.12); }
+
+.panel-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em;
+  color: #444; display: block; margin-bottom: -4px;
+}
+
+/* Kinetic Arrow button */
+.btn-kinetic {
+  display: inline-flex; align-items: center; justify-content: space-between; gap: 8px;
+  width: 100%; padding: 13px 18px;
+  background: transparent; color: rgba(255,255,255,0.6);
+  border: 1px solid rgba(255,255,255,0.12);
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+  cursor: pointer; transition: all 0.25s;
+}
+.btn-kinetic:hover { border-color: rgba(255,255,255,0.3); color: #fff; background: rgba(255,255,255,0.02); }
+.btn-kinetic:hover .btn-k-arrow { transform: translateX(4px); }
+.btn-k-arrow { transition: transform 0.25s; flex-shrink: 0; }
+
+/* Shimmer Beam button */
+.btn-shimmer-beam {
+  position: relative; overflow: hidden;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 100%; padding: 13px 18px; border-radius: 0;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--accent); background: transparent;
+  border: 1px solid rgba(1,187,255,0.35); cursor: pointer; transition: all 0.3s;
+}
+.btn-shimmer-beam::after {
+  content: '';
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(1,187,255,0.2), transparent);
+  transform: translateX(-100%) skewX(-15deg);
+}
+.btn-shimmer-beam:hover { border-color: var(--accent); background: rgba(1,187,255,0.06); color: #fff; }
+.btn-shimmer-beam:hover::after { animation: shimmer 0.8s ease-out; }
+
+/* KINETIC loader cards */
+.kinetic-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; padding: 16px 8px; height: 88px;
+  transition: border-color 0.25s;
+}
+.kinetic-card:hover { border-color: rgba(255,255,255,0.14); }
+.kinetic-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  text-transform: uppercase; letter-spacing: 0.12em; color: #444;
+}
+
+/* KINETIC keyframes */
+@keyframes spin   { to { transform: rotate(360deg); } }
+@keyframes radar  { 0% { transform:scale(0.4); opacity:1; } 100% { transform:scale(2.4); opacity:0; } }
+
+/* Form inputs */
+.form-input-wrapper {
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  padding-bottom: 8px; transition: border-color 0.25s;
+}
+.form-input-wrapper:focus-within { border-bottom-color: var(--accent); }
+.form-input-d7 {
+  background: transparent; border: none; outline: none;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  color: var(--text-primary); font-family: 'Space Mono', monospace; font-size: 12px;
+  padding: 6px 0; width: 100%; transition: border-color 0.25s;
+}
+.form-input-d7:focus { border-bottom-color: var(--accent); }
+.form-input-d7::placeholder { color: #444; }
+.form-input-wrapper .form-input-d7 { border: none; padding: 0; }
+
+/* Checkbox D7 */
+.d7-chk { display: none; }
+.d7-chk-box {
+  width: 18px; height: 18px; border: 1px solid #444;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+}
+.d7-chk:checked + .d7-chk-box { background: var(--accent); border-color: var(--accent); }
+.d7-chk-box svg { transform: scale(0); transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1); }
+.d7-chk:checked + .d7-chk-box svg { transform: scale(1); }
+
+/* Toggle D7 */
+.d7-tog { display: none; }
+.d7-tog-track {
+  width: 38px; height: 20px; background: #222; border-radius: 9999px;
+  position: relative; cursor: pointer; transition: background 0.25s; display: inline-block;
+}
+.d7-tog:checked + .d7-tog-track { background: var(--accent); }
+.d7-tog-track::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; background: #fff; border-radius: 50%;
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.d7-tog:checked + .d7-tog-track::after { transform: translateX(18px); }
+
+/* Like toggle */
+.d7-like { display: none; }
+.d7-like + svg { color: #444; transition: all 0.25s; cursor: pointer; }
+.d7-like:checked + svg { color: var(--accent); fill: var(--accent); }
+
+/* Stepper */
+.stepper-row { display: flex; align-items: center; }
+.stepper-circle {
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid #333; background: var(--bg-card); color: #555;
+  font-size: 10px; transition: all 0.2s;
+}
+.stepper-circle.done { background: var(--accent); border-color: var(--accent); color: #000; }
+.stepper-circle.active { border-color: var(--accent); background: rgba(1,187,255,0.1); box-shadow: 0 0 0 3px rgba(1,187,255,0.15); }
+.stepper-circle.active .stepper-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.stepper-line { flex: 1; height: 1px; background: #222; }
+.stepper-line.active-line { background: var(--accent); }
+.stepper-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.stepper-lbl {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  text-transform: uppercase; letter-spacing: 0.1em; color: #444; white-space: nowrap;
+}
+.stepper-lbl.done  { color: var(--accent); }
+.stepper-lbl.active { color: rgba(255,255,255,0.7); }
+
+/* Alert */
+.alert-d7 {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 14px;
+  border-left: 3px solid #ffaa00;
+  background: rgba(255,170,0,0.04);
+  border-top: 1px solid rgba(255,170,0,0.1);
+  border-right: 1px solid rgba(255,170,0,0.1);
+  border-bottom: 1px solid rgba(255,170,0,0.1);
+}
+
+/* Status badges */
+.status-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  padding: 3px 10px; border-radius: 9999px;
+  border: 1px solid rgba(255,255,255,0.08); color: #555;
+}
+.status-badge.green { color: #00cc66; border-color: rgba(0,204,102,0.25); background: rgba(0,204,102,0.04); }
+.status-badge.yellow { color: #ffaa00; border-color: rgba(255,170,0,0.25); background: rgba(255,170,0,0.04); }
+.status-badge.blue { color: var(--accent); border-color: rgba(1,187,255,0.25); background: rgba(1,187,255,0.04); }
+
+/* ========== FOOTER ========== */
+.footer-link {
+  font-size: 13px; color: #444; text-decoration: none;
+  transition: color 0.2s; display: block;
+}
+.footer-link:hover { color: var(--text-primary); }
+.footer-social-icon {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.08);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #555; text-decoration: none; transition: all 0.25s;
+}
+.footer-social-icon:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ========== DASHBOARD BOX ========== */
+
+/* Map font-display → Inter (Manrope not loaded per spec) */
+.font-display { font-family: 'Inter', sans-serif; }
+.font-code     { font-family: 'JetBrains Mono', monospace; }
+
+@keyframes scanline {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+@keyframes dataFlicker {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+.dashboard-box {
+  display: flex; flex-direction: column;
+  gap: 24px;
+  max-width: 1800px; margin: 0 auto;
+  padding: 0 32px;
+}
+@media (min-width: 1024px) { .dashboard-box { flex-direction: row; } }
+@media (max-width: 767px)  { .dashboard-box { padding: 0 16px; } }
+
+/* Column 1 — System Status */
+.col-status {
+  flex: 1;
+  background: #000;
+  border: 1px dashed #27272a;
+  position: relative;
+  padding: 32px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  transition: border-color 0.4s ease;
+  min-height: 420px;
+}
+.col-status:hover { border-color: rgba(1,187,255,0.35); }
+
+/* Corner brackets */
+.corner-bracket { position: absolute; width: 10px; height: 10px; }
+.corner-bracket.tl { top: 0;    left: 0;  border-top:    1px solid var(--accent); border-left:  1px solid var(--accent); }
+.corner-bracket.tr { top: 0;    right: 0; border-top:    1px solid var(--accent); border-right: 1px solid var(--accent); }
+.corner-bracket.bl { bottom: 0; left: 0;  border-bottom: 1px solid var(--accent); border-left:  1px solid var(--accent); }
+.corner-bracket.br { bottom: 0; right: 0; border-bottom: 1px solid var(--accent); border-right: 1px solid var(--accent); }
+
+/* Column 2 — Dashboard Preview */
+.col-preview {
+  flex: 1.6;
+  min-height: 420px;
+  position: relative; overflow: hidden;
+  border: 1px solid #27272a;
+  background: #000;
+}
+.col-preview .preview-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 80%, rgba(1,187,255,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 20%, rgba(1,187,255,0.08) 0%, transparent 50%),
+    linear-gradient(135deg, #0a0a0a 0%, #050510 50%, #0a0a0a 100%);
+  transition: opacity 0.6s ease;
+}
+.col-preview:hover .preview-bg { opacity: 0.75; }
+
+/* Phone mockup */
+.phone-mockup {
+  position: absolute;
+  top: 32%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  border: none; border-radius: 0;
+  background: transparent; overflow: visible;
+  box-shadow: none;
+  transition: transform 0.5s ease;
+}
+.col-preview:hover .phone-mockup {
+  transform: translate(-50%, -52%) scale(1.04);
+  box-shadow: none;
+}
+.phone-notch {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 100px; height: 20px; background: #000;
+  border-radius: 0 0 16px 16px; z-index: 10;
+}
+.phone-screen {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  padding: 28px 12px 12px;
+  background: linear-gradient(180deg, #080c10 0%, #0a0e14 100%);
+  position: relative; overflow: hidden;
+}
+.phone-scanline {
+  position: absolute; inset: 0;
+  background: linear-gradient(transparent 50%, rgba(1,187,255,0.03) 50%);
+  background-size: 100% 4px;
+  pointer-events: none; z-index: 5;
+}
+.mini-chart-bar {
+  background: var(--accent); border-radius: 2px 2px 0 0;
+  opacity: 0.7; transition: height 0.5s ease;
+}
+.mini-chart-bar.highlight { opacity: 1; }
+.mini-chart-bar.dim       { background: #1e3a4a; opacity: 0.45; }
+
+/* Column 3 — Capabilities */
+.col-capabilities {
+  flex: 1;
+  display: flex; flex-direction: column;
+  background: #000; border: 1px solid #27272a;
+}
+.cap-header {
+  padding: 20px 24px; border-bottom: 1px dashed #27272a;
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(24,24,27,0.1);
+}
+.cap-item {
+  flex: 1; border-bottom: 1px solid #1a1a1a;
+  padding: 22px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: relative; overflow: hidden;
+  transition: background 0.25s ease; cursor: pointer;
+  text-decoration: none; color: inherit;
+}
+.cap-item:last-child { border-bottom: none; }
+.cap-item:hover { background: rgba(24,24,27,0.35); }
+.cap-item .accent-bar {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--accent);
+  transform: translateX(-100%); transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+.cap-item:hover .accent-bar  { transform: translateX(0); }
+.cap-item .cap-title          { transition: transform 0.28s ease; }
+.cap-item:hover .cap-title    { transform: translateX(8px); }
+.cap-item .cap-arrow          { color: #3f3f46; transition: color 0.28s, transform 0.28s; }
+.cap-item:hover .cap-arrow    { color: var(--accent); transform: rotate(-45deg); }
+
+/* Dashboard CTA button — Brutalista / Cyan Beam */
+.btn-dashboard {
+  position: relative; isolation: isolate; overflow: hidden;
+  width: 100%; height: 50px;
+  background: rgb(39,39,42); color: var(--accent);
+  border: none; border-radius: 0;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+  cursor: pointer; font-family: 'Inter', sans-serif; text-decoration: none;
+  transition: background 0.35s, box-shadow 0.35s, color 0.25s;
+}
+.btn-dashboard::before {
+  content: '';
+  position: absolute; inset: -150%;
+  background: conic-gradient(from 0deg, transparent 0deg, transparent 295deg, #01bbff 325deg, #01bbff 360deg);
+  animation: spin 3s linear infinite;
+  opacity: 0; transition: opacity 0.35s;
+  z-index: -2;
+}
+.btn-dashboard::after {
+  content: '';
+  position: absolute; inset: 1px;
+  background: #080808;
+  z-index: -1;
+}
+.btn-dashboard:hover {
+  background: transparent; color: #fff;
+  box-shadow: 0 12px 40px rgba(1,187,255,0.25);
+}
+.btn-dashboard:hover::before { opacity: 1; }
+.btn-dashboard:hover .btn-dash-arrow { transform: translateX(3px); }
+.btn-dash-arrow { transition: transform 0.3s ease; }
+
+@media (max-width: 1023px) {
+  .col-status { min-height: auto; }
+  .col-preview { min-height: 400px; }
+}
+
+/* Tooltip */
+#d7-tooltip {
+  position: fixed;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 6px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: #eee;
+  pointer-events: none; opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 9999;
+  white-space: nowrap;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ========== PARTICLES BACKGROUND ========== -->
+<div id="particles-js"></div>
+
+<!-- ========== NAV ========== -->
+<nav class="ds-nav" id="mainNav">
+  <div class="max-w-[1800px] mx-auto flex items-center gap-1 px-4 md:px-8 py-3 overflow-x-auto">
+
+    <!-- Logo -->
+    <a href="#" style="font-weight:700;font-size:14px;color:var(--accent);padding-right:24px;white-space:nowrap;text-decoration:none;letter-spacing:-0.03em;flex-shrink:0;">
+      D7<span style="opacity:0.35;font-weight:300;"> FOUNDATION</span>
+    </a>
+
+    <!-- Nav links -->
+    <a class="nav-link" href="#hero">Sistema</a>
+    <a class="nav-link active" href="#modules">Módulos</a>
+
+
+
+    <!-- Right: status badge -->
+    <div class="ml-auto hidden md:flex items-center gap-3 flex-shrink-0">
+      <div class="glass-badge flex items-center gap-2">
+        <span class="status-dot" style="animation:pulseGlow 2s ease-in-out infinite;"></span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:0.06em;">Operacional</span>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+<!-- ========== MAIN ========== -->
+<main class="relative z-10">
+
+  <!-- ================================================================
+       DOBRA 1 — HERO
+  ================================================================ -->
+  <section class="px-4 md:px-8 pt-28 pb-20 relative max-w-[1800px] mx-auto min-h-[90vh] flex flex-col justify-center" id="hero">
+
+    <!-- Decorative icon (desktop) -->
+    <div class="hidden lg:block absolute top-16 right-8 select-none pointer-events-none" style="opacity:0.08;">
+      <iconify-icon icon="solar:maximize-linear" style="font-size:80px;color:#fff;" stroke-width="1"></iconify-icon>
+    </div>
+
+    <!-- Label indicator -->
+    <div class="flex items-center gap-3 mb-7 animate-in" style="animation-delay:0.05s;">
+      <span class="w-2 h-2 rounded-full pulse-dot" style="background:var(--accent);flex-shrink:0;"></span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.2em;color:#555;">D7 Foundation // Sistema v1.0</span>
+    </div>
+
+    <!-- Display typography — 3 lines -->
+    <h1 class="hero-display max-w-6xl mb-10">
+      <span class="block animate-in" style="animation-delay:0.15s;color:#fff;font-weight:300;">Intelligence</span>
+      <span class="block hero-stroke animate-in" style="animation-delay:0.3s;">Digital Conglomerate &amp;</span>
+      <span class="block hero-accent animate-in" style="animation-delay:0.45s;">Premium Ecosystem</span>
+    </h1>
+
+    <!-- Descriptor + CTAs -->
+    <div class="animate-in" style="animation-delay:0.6s;">
+      <div class="border-l-2 pl-5 max-w-2xl mb-8" style="border-color:var(--accent);">
+        <p class="text-sm md:text-base leading-relaxed" style="color:var(--text-secondary);">
+          Infraestrutura modular para financial intelligence, automação AI, media digital e cybersecurity.
+        </p>
+        <span class="block mt-2 text-xs" style="font-family:'JetBrains Mono',monospace;color:#444;">
+          // crypto × prediction markets × AI automation × paid traffic × content ops
+        </span>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-4">
+        <button class="btn-primary" onclick="document.getElementById('modules').scrollIntoView({behavior:'smooth'})">
+          Explorar Módulos
+          <iconify-icon icon="solar:arrow-right-linear" style="font-size:18px;" stroke-width="1.5"></iconify-icon>
+        </button>
+
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ================================================================
+       DIVISOR — MARQUEE INFINITO
+  ================================================================ -->
+  <div class="w-full overflow-hidden relative py-5" style="border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06);background:var(--bg-surface);">
+    <!-- Fade edges -->
+    <div style="position:absolute;left:0;top:0;bottom:0;width:80px;background:linear-gradient(to right,var(--bg-surface),transparent);z-index:2;pointer-events:none;"></div>
+    <div style="position:absolute;right:0;top:0;bottom:0;width:80px;background:linear-gradient(to left,var(--bg-surface),transparent);z-index:2;pointer-events:none;"></div>
+
+    <div class="marquee-track flex gap-8 items-center whitespace-nowrap">
+      <span class="marquee-text">Crypto</span><span class="marquee-separator">&times;</span>
+      <span class="marquee-text">AI Automation</span><span class="marquee-separator">&times;</span>
+      <span class="marquee-text">Financial Intelligence</span><span class="marquee-separator">&times;</span>
+      <span class="marquee-text">Prediction Markets</span><span class="marquee-separator">&times;</span>
+      <span class="marquee-text">Cybersecurity</span><span class="marquee-separator">&times;</span>
+      <span class="marquee-text">Media Digital</span><span class="marquee-separator">&times;</span>
+      <span class="marquee-text">Education</span><span class="marquee-separator">&times;</span>
+      <!-- Duplicate for seamless loop -->
+      <span class="marquee-text">Crypto</span><span class="marquee-separator">&times;</span>
+      <span class="marquee-text">AI Automation</span><span class="marquee-separator">&times;</span>
+      <span class="marquee-text">Financial Intelligence</span><span class="marquee-separator">&times;</span>
+      <span class="marquee-text">Prediction Markets</span><span class="marquee-separator">&times;</span>
+      <span class="marquee-text">Cybersecurity</span><span class="marquee-separator">&times;</span>
+      <span class="marquee-text">Media Digital</span><span class="marquee-separator">&times;</span>
+      <span class="marquee-text">Education</span><span class="marquee-separator">&times;</span>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       DOBRA 2 — CARROSSEL DE MÓDULOS
+  ================================================================ -->
+  <section class="carousel-section" id="modules">
+
+    <!-- Section header -->
+    <div class="carousel-header">
+      <div class="flex items-center gap-3 mb-4 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.1s both;">
+        <span class="w-2 h-2 rounded-full pulse-dot" style="background:var(--accent);flex-shrink:0;"></span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.2em;color:#555;">Ecosystem // Módulos D7</span>
+      </div>
+      <div class="flex items-end justify-between gap-4 flex-wrap">
+        <div>
+          <h2 class="text-3xl md:text-5xl font-bold uppercase tracking-tight animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.2s both;">
+            Nossos <span style="color:var(--accent);">Módulos</span>
+          </h2>
+          <p class="text-sm mt-3 max-w-lg animate-on-scroll" style="color:var(--text-muted);animation:animationIn 0.8s ease-out 0.3s both;">
+            Cada módulo opera de forma independente mas se integra ao ecossistema D7 como infraestrutura coesa.
+          </p>
+        </div>
+        <div class="hidden md:block animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.4s both;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#444;text-transform:uppercase;letter-spacing:0.12em;">Arraste para navegar →</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDER -->
+    <div class="slider-container" id="slider">
+
+      <!-- [01/07] CRYPTO & PREDICTION -->
+      <div class="slide-card" id="slide-2">
+        <div class="slide-bg-grid"></div>
+        <div class="slide-bg-glow" style="bottom:-80px;left:-80px;background:rgba(1,187,255,0.1);"></div>
+        <div class="slide-header animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.1s both;">
+          <span class="slide-number">[01/07]</span>
+          <span class="slide-category">Economy</span>
+        </div>
+        <div class="slide-content">
+          <div class="slide-icon-box mb-6 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.2s both;">
+            <iconify-icon icon="solar:chart-square-bold-duotone" style="font-size:22px;color:var(--accent);"></iconify-icon>
+          </div>
+          <h2 class="slide-title animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.3s both;">
+            D7<br/><span class="slide-subtitle">Economy</span>
+          </h2>
+          <div class="space-y-3 mt-6 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.4s both;">
+            <div class="slide-feature">
+              <iconify-icon icon="solar:check-circle-linear" style="font-size:15px;" stroke-width="1.5"></iconify-icon>
+              <span>Polymarket probability analysis</span>
+            </div>
+            <div class="slide-feature">
+              <iconify-icon icon="solar:check-circle-linear" style="font-size:15px;" stroke-width="1.5"></iconify-icon>
+              <span>Binance Futures automation</span>
+            </div>
+            <div class="slide-feature">
+              <iconify-icon icon="solar:check-circle-linear" style="font-size:15px;" stroke-width="1.5"></iconify-icon>
+              <span>Sports betting intelligence</span>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.5s both;">
+          <span style="font-family:'Space Mono',monospace;font-size:11px;color:#444;">CLOB API + Claude</span>
+          <a href="d7-crypto.html" class="slide-cta">
+            <iconify-icon icon="solar:arrow-right-linear" style="font-size:17px;" stroke-width="1.5"></iconify-icon>
+          </a>
+        </div>
+      </div>
+
+      <!-- [02/07] D7 INTELLIGENCE -->
+      <div class="slide-card locked" id="slide-1">
+        <div class="slide-lock-overlay">
+          <div class="slide-lock-icon">
+            <iconify-icon icon="solar:lock-bold-duotone" style="font-size:20px;color:rgba(255,255,255,0.4);"></iconify-icon>
+          </div>
+          <span class="slide-lock-badge">Em Breve</span>
+        </div>
+        <div class="slide-bg-grid"></div>
+        <div class="slide-bg-glow" style="top:-120px;right:-120px;background:rgba(1,187,255,0.12);"></div>
+        <div class="slide-header animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.1s both;">
+          <span class="slide-number">[02/07]</span>
+          <span class="slide-category">AI &amp; Orchestration</span>
+        </div>
+        <div class="slide-content">
+          <div class="slide-icon-box mb-6 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.2s both;">
+            <iconify-icon icon="solar:cpu-bold-duotone" style="font-size:22px;color:var(--accent);"></iconify-icon>
+          </div>
+          <h2 class="slide-title animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.3s both;">
+            D7<br/><span class="slide-subtitle">Intelligence</span>
+          </h2>
+          <p class="slide-description mt-6 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.4s both;">
+            Cérebro técnico do ecossistema. Orquestração AI, agents autônomos e pipelines de dados em tempo real.
+          </p>
+          <div class="flex flex-wrap gap-2 mt-4 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.5s both;">
+            <span class="slide-tag">Grok</span>
+            <span class="slide-tag">Claude</span>
+            <span class="slide-tag">GPT</span>
+            <span class="slide-tag accent">Core</span>
+          </div>
+        </div>
+        <div class="slide-footer animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.6s both;">
+          <span style="font-family:'Space Mono',monospace;font-size:11px;color:#444;">Multi-model pipeline</span>
+          <a href="d7-intelligence.html" class="slide-cta">
+            <iconify-icon icon="solar:arrow-right-linear" style="font-size:17px;" stroke-width="1.5"></iconify-icon>
+          </a>
+        </div>
+      </div>
+
+      <!-- [03/07] D7 WORK -->
+      <div class="slide-card locked" id="slide-3">
+        <div class="slide-lock-overlay">
+          <div class="slide-lock-icon">
+            <iconify-icon icon="solar:lock-bold-duotone" style="font-size:20px;color:rgba(255,255,255,0.4);"></iconify-icon>
+          </div>
+          <span class="slide-lock-badge">Em Breve</span>
+        </div>
+        <div class="slide-bg-grid"></div>
+        <div class="slide-bg-glow" style="top:-60px;right:-60px;background:rgba(1,187,255,0.08);"></div>
+        <div class="slide-header animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.1s both;">
+          <span class="slide-number">[03/07]</span>
+          <span class="slide-category">Monetização</span>
+        </div>
+        <div class="slide-content">
+          <div class="slide-icon-box mb-6 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.2s both;">
+            <iconify-icon icon="solar:code-square-bold-duotone" style="font-size:22px;color:var(--accent);"></iconify-icon>
+          </div>
+          <h2 class="slide-title animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.3s both;">
+            D7<br/><span class="slide-subtitle">Work</span>
+          </h2>
+          <p class="slide-description mt-6 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.4s both;">
+            Marketplace de serviços premium. Modelo hybrid: manual-first evoluindo para automação completa.
+          </p>
+          <div class="flex flex-wrap gap-2 mt-4 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.5s both;">
+            <span class="slide-tag">Freelance</span>
+            <span class="slide-tag">SaaS</span>
+            <span class="slide-tag">Infoproduct</span>
+          </div>
+        </div>
+        <div class="slide-footer animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.6s both;">
+          <span style="font-family:'Space Mono',monospace;font-size:11px;color:#444;">Manual → Automated</span>
+          <a href="d7-work.html" class="slide-cta">
+            <iconify-icon icon="solar:arrow-right-linear" style="font-size:17px;" stroke-width="1.5"></iconify-icon>
+          </a>
+        </div>
+      </div>
+
+      <!-- [04/07] D7 NEWS -->
+      <div class="slide-card locked" id="slide-4">
+        <div class="slide-lock-overlay">
+          <div class="slide-lock-icon">
+            <iconify-icon icon="solar:lock-bold-duotone" style="font-size:20px;color:rgba(255,255,255,0.4);"></iconify-icon>
+          </div>
+          <span class="slide-lock-badge">Em Breve</span>
+        </div>
+        <div class="slide-bg-grid"></div>
+        <div class="slide-bg-glow" style="bottom:-100px;right:-60px;background:rgba(1,187,255,0.1);"></div>
+        <div class="slide-header animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.1s both;">
+          <span class="slide-number">[04/07]</span>
+          <span class="slide-category">Media</span>
+        </div>
+        <div class="slide-content">
+          <div class="slide-icon-box mb-6 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.2s both;">
+            <iconify-icon icon="solar:tv-bold-duotone" style="font-size:22px;color:var(--accent);"></iconify-icon>
+          </div>
+          <h2 class="slide-title animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.3s both;">
+            D7<br/><span class="slide-subtitle">News</span>
+          </h2>
+          <div class="space-y-3 mt-6 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.4s both;">
+            <div class="slide-feature">
+              <iconify-icon icon="solar:check-circle-linear" style="font-size:15px;" stroke-width="1.5"></iconify-icon>
+              <span>Operação media 100% AI</span>
+            </div>
+            <div class="slide-feature">
+              <iconify-icon icon="solar:check-circle-linear" style="font-size:15px;" stroke-width="1.5"></iconify-icon>
+              <span>Instagram, X, TikTok</span>
+            </div>
+            <div class="slide-feature">
+              <iconify-icon icon="solar:check-circle-linear" style="font-size:15px;" stroke-width="1.5"></iconify-icon>
+              <span>Trending topic detection</span>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.5s both;">
+          <span style="font-family:'Space Mono',monospace;font-size:11px;color:#444;">Grok + DALL-E + Veo 3</span>
+          <a href="d7-news.html" class="slide-cta">
+            <iconify-icon icon="solar:arrow-right-linear" style="font-size:17px;" stroke-width="1.5"></iconify-icon>
+          </a>
+        </div>
+      </div>
+
+      <!-- [05/07] D7 SECURITY LAB -->
+      <div class="slide-card locked" id="slide-5">
+        <div class="slide-lock-overlay">
+          <div class="slide-lock-icon">
+            <iconify-icon icon="solar:lock-bold-duotone" style="font-size:20px;color:rgba(255,255,255,0.4);"></iconify-icon>
+          </div>
+          <span class="slide-lock-badge">Em Breve</span>
+        </div>
+        <div class="slide-bg-grid"></div>
+        <div class="slide-bg-glow" style="top:-80px;left:-80px;background:rgba(1,187,255,0.1);"></div>
+        <div class="slide-header animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.1s both;">
+          <span class="slide-number">[05/07]</span>
+          <span class="slide-category">D7 Security</span>
+        </div>
+        <div class="slide-content">
+          <div class="slide-icon-box mb-6 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.2s both;">
+            <iconify-icon icon="solar:shield-check-bold-duotone" style="font-size:22px;color:var(--accent);"></iconify-icon>
+          </div>
+          <h2 class="slide-title animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.3s both;">
+            D7<br/><span class="slide-subtitle">Security</span>
+          </h2>
+          <p class="slide-description mt-6 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.4s both;">
+            Trust layer do ecossistema. Anti-scam, risk scoring, rug pull detection e browser extension.
+          </p>
+          <div class="flex flex-wrap gap-2 mt-4 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.5s both;">
+            <span class="slide-tag">Anti-Scam</span>
+            <span class="slide-tag">Risk Score</span>
+            <span class="slide-tag accent">Shield</span>
+          </div>
+        </div>
+        <div class="slide-footer animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.6s both;">
+          <span style="font-family:'Space Mono',monospace;font-size:11px;color:#444;">Browser extension</span>
+          <a href="d7-security.html" class="slide-cta">
+            <iconify-icon icon="solar:arrow-right-linear" style="font-size:17px;" stroke-width="1.5"></iconify-icon>
+          </a>
+        </div>
+      </div>
+
+      <!-- [06/07] D7 ARCHITECT -->
+      <div class="slide-card locked" id="slide-6">
+        <div class="slide-lock-overlay">
+          <div class="slide-lock-icon">
+            <iconify-icon icon="solar:lock-bold-duotone" style="font-size:20px;color:rgba(255,255,255,0.4);"></iconify-icon>
+          </div>
+          <span class="slide-lock-badge">Em Breve</span>
+        </div>
+        <div class="slide-bg-grid"></div>
+        <div class="slide-bg-glow" style="bottom:-60px;right:-100px;background:rgba(1,187,255,0.08);"></div>
+        <div class="slide-header animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.1s both;">
+          <span class="slide-number">[06/07]</span>
+          <span class="slide-category">Prompts</span>
+        </div>
+        <div class="slide-content">
+          <div class="slide-icon-box mb-6 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.2s both;">
+            <iconify-icon icon="solar:pen-new-square-bold-duotone" style="font-size:22px;color:var(--accent);"></iconify-icon>
+          </div>
+          <h2 class="slide-title animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.3s both;">
+            D7<br/><span class="slide-subtitle">Architect</span>
+          </h2>
+          <p class="slide-description mt-6 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.4s both;">
+            Fábrica de prompts e comportamento AI. Alimenta todos os módulos do ecossistema.
+          </p>
+          <div class="flex flex-wrap gap-2 mt-4 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.5s both;">
+            <span class="slide-tag">Free</span>
+            <span class="slide-tag">Pro</span>
+            <span class="slide-tag">Stripe</span>
+          </div>
+        </div>
+        <div class="slide-footer animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.6s both;">
+          <span style="font-family:'Space Mono',monospace;font-size:11px;color:#444;">Supabase + Netlify</span>
+          <a href="d7-architect.html" class="slide-cta">
+            <iconify-icon icon="solar:arrow-right-linear" style="font-size:17px;" stroke-width="1.5"></iconify-icon>
+          </a>
+        </div>
+      </div>
+
+      <!-- [07/07] CTA -->
+      <div class="slide-card accent-card" id="slide-7">
+        <div class="slide-bg-grid"></div>
+        <div class="slide-header animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.1s both;">
+          <span class="slide-number" style="color:rgba(0,0,0,0.4);">[07/07]</span>
+          <span class="w-2 h-2 rounded-full animate-pulse" style="background:rgba(0,0,0,0.4);"></span>
+        </div>
+        <div class="slide-content items-center text-center justify-center gap-0">
+          <h2 class="slide-title animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.2s both;font-size:clamp(2rem,5.5vw,3.5rem);">
+            O Mundo<br/>
+            <span class="slide-subtitle" style="color:rgba(0,0,0,0.35);">Está Mudando</span>
+          </h2>
+          <p class="mt-6 text-sm font-mono max-w-xs mx-auto animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.3s both;color:rgba(0,0,0,0.6);font-family:'Space Mono',monospace;">
+            A minoria estará preparada. Faça parte da infraestrutura que vai definir a próxima era digital.
+          </p>
+          <div class="mt-8 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.4s both;">
+            <button class="slide-cta-full accent-dark">
+              Entrar no Ecossistema
+              <iconify-icon icon="solar:arrow-right-up-linear" style="font-size:15px;" stroke-width="1.5"></iconify-icon>
+            </button>
+          </div>
+        </div>
+        <div class="slide-footer animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.5s both;">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs" style="background:rgba(0,0,0,0.15);border:1px solid rgba(0,0,0,0.2);color:#000;">D7</div>
+            <div>
+              <span class="block text-xs font-semibold uppercase tracking-wide" style="color:#000;">D7 Foundation</span>
+              <span class="block text-[10px]" style="font-family:'JetBrains Mono',monospace;color:rgba(0,0,0,0.5);">Premium Digital Conglomerate</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CAROUSEL NAVIGATION -->
+    <div class="carousel-nav">
+      <!-- Dots -->
+      <div class="carousel-dots" id="carouselDots">
+        <button class="carousel-dot active" data-index="0"></button>
+        <button class="carousel-dot" data-index="1"></button>
+        <button class="carousel-dot" data-index="2"></button>
+        <button class="carousel-dot" data-index="3"></button>
+        <button class="carousel-dot" data-index="4"></button>
+        <button class="carousel-dot" data-index="5"></button>
+        <button class="carousel-dot" data-index="6"></button>
+        <button class="carousel-dot" data-index="7"></button>
+      </div>
+
+      <!-- Mobile swipe hint -->
+      <div class="swipe-hint md:hidden">
+        <span>Swipe</span>
+        <iconify-icon icon="solar:arrow-left-right-linear" style="font-size:13px;" stroke-width="1.5"></iconify-icon>
+      </div>
+
+      <!-- Arrows (desktop) -->
+      <div class="carousel-arrows">
+        <button class="carousel-arrow" id="prevBtn" aria-label="Slide anterior">
+          <iconify-icon icon="solar:arrow-left-linear" style="font-size:18px;" stroke-width="1.5"></iconify-icon>
+        </button>
+        <button class="carousel-arrow" id="nextBtn" aria-label="Próximo slide">
+          <iconify-icon icon="solar:arrow-right-linear" style="font-size:18px;" stroke-width="1.5"></iconify-icon>
+        </button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ================================================================
+       DOBRA 2.5 — DASHBOARD BOX (Sétimo Distrito)
+  ================================================================ -->
+  <section class="py-16 md:py-24 relative" id="dashboard">
+
+    <!-- Section header -->
+    <div class="max-w-[1800px] mx-auto px-4 md:px-8 mb-10">
+      <div class="flex items-center gap-3 mb-5 animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.1s both;">
+        <span class="w-2 h-2 rounded-full pulse-dot" style="background:var(--accent);flex-shrink:0;"></span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.2em;color:#555;">Dashboard // Sétimo Distrito</span>
+      </div>
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div>
+          <h2 class="text-3xl md:text-5xl font-bold uppercase tracking-tight animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.2s both;">
+            Visão Geral do <span style="color:var(--accent);">Mercado</span>
+          </h2>
+          <p class="text-sm mt-3 max-w-lg animate-on-scroll" style="color:var(--text-muted);animation:animationIn 0.8s ease-out 0.3s both;">
+            Acesse o dashboard completo com dados em tempo real — crypto, whale alerts, análise técnica e panorama global.
+          </p>
+        </div>
+        <div class="hidden md:block animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.4s both;">
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border:1px solid #27272a;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);">
+            <span style="width:6px;height:6px;border-radius:50%;background:#00cc66;display:inline-block;animation:pulseGlow 2s ease-in-out infinite;box-shadow:0 0 4px #00cc66;"></span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#555;text-transform:uppercase;letter-spacing:0.12em;">Feed ao vivo</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD BOX (3 colunas com gap: 24px) -->
+    <div class="dashboard-box">
+
+      <!-- ── COLUNA 1: System Status ── -->
+      <div class="col-status animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.3s both;">
+        <div class="corner-bracket tl"></div>
+        <div class="corner-bracket tr"></div>
+        <div class="corner-bracket bl"></div>
+        <div class="corner-bracket br"></div>
+
+        <div style="display:flex;flex-direction:column;gap:32px;">
+          <!-- Header -->
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px dashed #27272a;padding-bottom:16px;">
+            <span class="font-code" style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;font-weight:700;color:var(--accent);">[ System Status ]</span>
+            <div style="display:flex;gap:6px;">
+              <div style="width:6px;height:6px;background:var(--accent);animation:pulseGlow 2s ease-in-out infinite;"></div>
+              <div style="width:6px;height:6px;background:#27272a;"></div>
+              <div style="width:6px;height:6px;background:#27272a;"></div>
+            </div>
+          </div>
+
+          <!-- Big stat -->
+          <div>
+            <p class="font-code" style="font-size:10px;color:#52525b;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px;">Módulos Ativos</p>
+            <div style="display:flex;align-items:baseline;gap:12px;">
+              <p class="font-display" style="font-size:3.5rem;font-weight:500;color:#fff;letter-spacing:-0.04em;line-height:1;">6</p>
+              <span class="font-code" style="font-size:11px;color:var(--accent);">LIVE</span>
+            </div>
+            <p style="font-size:12px;color:#71717a;margin-top:12px;line-height:1.6;">Monitoramento 24/7 com AI — crypto, mercado global, whale alerts e análise técnica.</p>
+          </div>
+
+          <!-- Mini price tickers -->
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span class="font-code" style="font-size:10px;color:#52525b;text-transform:uppercase;letter-spacing:0.12em;">BTC/USDT</span>
+              <span class="font-code" style="font-size:12px;color:#22c55e;">+2.4%</span>
+            </div>
+            <div style="height:1px;background:#27272a;"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span class="font-code" style="font-size:10px;color:#52525b;text-transform:uppercase;letter-spacing:0.12em;">ETH/USDT</span>
+              <span class="font-code" style="font-size:12px;color:#f87171;">-0.8%</span>
+            </div>
+            <div style="height:1px;background:#27272a;"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span class="font-code" style="font-size:10px;color:#52525b;text-transform:uppercase;letter-spacing:0.12em;">S&amp;P 500</span>
+              <span class="font-code" style="font-size:12px;color:#22c55e;">+0.3%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <a class="btn-dashboard" href="dashboard.html" style="margin-top:32px;">
+          <span>View Dashboard</span>
+          <svg class="btn-dash-arrow" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          </svg>
+        </a>
+      </div>
+
+      <!-- ── COLUNA 2: Dashboard Preview ── -->
+      <div class="col-preview animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.5s both;">
+        <div class="preview-bg"></div>
+
+        <!-- Content overlay -->
+        <div style="position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:space-between;padding:24px 32px;">
+
+          <!-- Top bar -->
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+            <div style="background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);border:1px solid #27272a;padding:16px 20px;">
+              <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+                <span style="width:6px;height:6px;background:var(--accent);display:inline-block;"></span>
+                <p class="font-code" style="font-size:10px;color:#71717a;text-transform:uppercase;letter-spacing:0.14em;">Sétimo Distrito</p>
+              </div>
+              <h3 class="font-display" style="font-size:1.4rem;font-weight:600;color:#fff;letter-spacing:-0.02em;text-transform:uppercase;">Dashboard</h3>
+            </div>
+            <a href="dashboard.html" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:var(--accent);color:#000;border:1px solid transparent;transition:all 0.25s;text-decoration:none;" onmouseenter="this.style.background='#fff'" onmouseleave="this.style.background='var(--accent)'">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              </svg>
+            </a>
+          </div>
+
+          <!-- Phone mockup (center) -->
+          <div style="display:flex;justify-content:center;align-items:center;position:relative;flex:1;padding:20px 0;min-height:400px;">
+            <!-- Glow behind phone -->
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(1,187,255,0.18) 0%,transparent 70%);filter:blur(40px);pointer-events:none;"></div>
+            <div class="phone-mockup">
+              <img
+                src="dashboard.png"
+                alt="D7 Dashboard"
+                style="width:100%;height:auto;display:block;"
+              />
+            </div>
+          </div>
+
+          <!-- Bottom -->
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <!-- Tags -->
+            <div style="display:flex;border:1px solid #27272a;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);width:fit-content;">
+              <span class="db-tag font-code" style="padding:8px 16px;border-right:1px solid #27272a;font-size:10px;color:#d4d4d8;text-transform:uppercase;cursor:default;transition:color 0.2s;">Live</span>
+              <span class="db-tag font-code" style="padding:8px 16px;border-right:1px solid #27272a;font-size:10px;color:#d4d4d8;text-transform:uppercase;cursor:default;transition:color 0.2s;">Real-Time</span>
+              <span class="db-tag font-code" style="padding:8px 16px;font-size:10px;color:#d4d4d8;text-transform:uppercase;cursor:default;transition:color 0.2s;">24h</span>
+            </div>
+            <!-- Quote -->
+            <div style="background:rgba(0,0,0,0.92);backdrop-filter:blur(8px);padding:16px 20px;max-width:420px;border-left:3px solid var(--accent);">
+              <p style="font-size:13px;color:#a1a1aa;line-height:1.65;">Dados de mercado em tempo real com whale tracking, análise técnica automatizada e alertas inteligentes.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Corner accent -->
+        <div style="position:absolute;bottom:24px;right:24px;width:28px;height:28px;border-right:1px solid rgba(1,187,255,0.2);border-bottom:1px solid rgba(1,187,255,0.2);z-index:10;pointer-events:none;"></div>
+      </div>
+
+      <!-- ── COLUNA 3: Dashboard Index ── -->
+      <div class="col-capabilities animate-on-scroll" style="animation:animationIn 0.8s ease-out 0.7s both;">
+        <!-- Header -->
+        <div class="cap-header">
+          <span class="font-code" style="font-size:10px;color:#fff;text-transform:uppercase;letter-spacing:0.14em;font-weight:700;">Dashboard Index</span>
+          <div style="display:flex;gap:4px;">
+            <div style="width:2px;height:12px;background:var(--accent);"></div>
+            <div style="width:2px;height:12px;background:#27272a;"></div>
+            <div style="width:2px;height:12px;background:#27272a;"></div>
+          </div>
+        </div>
+
+        <!-- Items -->
+        <div style="flex:1;display:flex;flex-direction:column;">
+          <a class="cap-item" href="dashboard.html#whale">
+            <div class="accent-bar"></div>
+            <div>
+              <span class="cap-num font-code" style="display:block;font-size:10px;color:#52525b;margin-bottom:4px;transition:color 0.25s;">01</span>
+              <h4 class="cap-title font-display" style="font-size:1.1rem;color:#fff;font-weight:400;letter-spacing:-0.02em;">Whale Alert</h4>
+            </div>
+            <svg class="cap-arrow" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+            </svg>
+          </a>
+
+          <a class="cap-item" href="dashboard.html#panorama">
+            <div class="accent-bar"></div>
+            <div>
+              <span class="cap-num font-code" style="display:block;font-size:10px;color:#52525b;margin-bottom:4px;transition:color 0.25s;">02</span>
+              <h4 class="cap-title font-display" style="font-size:1.1rem;color:#fff;font-weight:400;letter-spacing:-0.02em;">Panorama Global</h4>
+            </div>
+            <svg class="cap-arrow" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+            </svg>
+          </a>
+
+          <a class="cap-item" href="dashboard.html#noticias">
+            <div class="accent-bar"></div>
+            <div>
+              <span class="cap-num font-code" style="display:block;font-size:10px;color:#52525b;margin-bottom:4px;transition:color 0.25s;">03</span>
+              <h4 class="cap-title font-display" style="font-size:1.1rem;color:#fff;font-weight:400;letter-spacing:-0.02em;">Notícias</h4>
+            </div>
+            <svg class="cap-arrow" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+            </svg>
+          </a>
+
+          <a class="cap-item" href="dashboard.html#mercado">
+            <div class="accent-bar"></div>
+            <div>
+              <span class="cap-num font-code" style="display:block;font-size:10px;color:#52525b;margin-bottom:4px;transition:color 0.25s;">04</span>
+              <h4 class="cap-title font-display" style="font-size:1.1rem;color:#fff;font-weight:400;letter-spacing:-0.02em;">Mercado Crypto</h4>
+            </div>
+            <svg class="cap-arrow" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+</main>
+
+
+    <!-- ================================================================
+       DOBRA 5 — FOOTER
+  ================================================================ -->
+  <footer style="border-top:1px solid rgba(255,255,255,0.06);background:var(--bg-surface);padding-bottom:32px;" id="footer">
+    <div class="max-w-[1800px] mx-auto px-4 md:px-8 pt-16">
+
+      <!-- Top grid -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 mb-12">
+
+        <!-- Logo + Tagline + Social -->
+        <div class="md:col-span-2">
+          <div style="font-size:18px;font-weight:700;letter-spacing:-0.03em;color:var(--accent);margin-bottom:14px;">
+            D7<span style="opacity:0.3;font-weight:300;"> FOUNDATION</span>
+          </div>
+          <p style="font-family:'Space Mono',monospace;font-size:12px;color:#444;line-height:2;max-width:280px;">
+            O mundo está mudando.<br/>A minoria estará preparada.
+          </p>
+          <!-- Social icons -->
+          <div style="display:flex;gap:10px;margin-top:20px;">
+            <a href="#" class="footer-social-icon" aria-label="Twitter/X">
+              <iconify-icon icon="solar:twitter-bold-duotone" style="font-size:17px;"></iconify-icon>
+            </a>
+            <a href="#" class="footer-social-icon" aria-label="Instagram">
+              <iconify-icon icon="solar:instagram-bold-duotone" style="font-size:17px;"></iconify-icon>
+            </a>
+            <a href="#" class="footer-social-icon" aria-label="GitHub">
+              <iconify-icon icon="solar:github-bold-duotone" style="font-size:17px;"></iconify-icon>
+            </a>
+            <a href="#" class="footer-social-icon" aria-label="Telegram">
+              <iconify-icon icon="solar:telegram-bold-duotone" style="font-size:17px;"></iconify-icon>
+            </a>
+          </div>
+        </div>
+
+        <!-- Módulos -->
+        <div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:#333;display:block;margin-bottom:20px;">Módulos</span>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;">
+            <li><a href="#modules" class="footer-link">D7 Intelligence</a></li>
+            <li><a href="#modules" class="footer-link">D7 Economy</a></li>
+            <li><a href="#modules" class="footer-link">D7 Work</a></li>
+            <li><a href="#modules" class="footer-link">D7 News</a></li>
+            <li><a href="#modules" class="footer-link">D7 Security</a></li>
+            <li><a href="#modules" class="footer-link">D7 Architect</a></li>
+          </ul>
+        </div>
+
+        <!-- Sistema -->
+        <div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:#333;display:block;margin-bottom:20px;">Sistema</span>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;">
+            <li><a href="#" class="footer-link">Documentação</a></li>
+            <li><a href="#" class="footer-link">Status Page</a></li>
+            <li><a href="#" class="footer-link">API Reference</a></li>
+            <li><a href="#" class="footer-link">Changelog</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Divider -->
+      <div class="glass-divider-h"></div>
+
+      <!-- Copyright row -->
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:24px;" class="md:flex-row md:items-center md:justify-between">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#2a2a2a;text-transform:uppercase;letter-spacing:0.1em;">
+          © 2026 D7 Foundation. All Rights Reserved.
+        </span>
+        <div style="display:flex;align-items:center;gap:24px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;">
+          <a href="#" style="color:#2a2a2a;text-decoration:none;transition:color 0.2s;" onmouseenter="this.style.color='var(--accent)'" onmouseleave="this.style.color='#2a2a2a'">Privacy</a>
+          <a href="#" style="color:#2a2a2a;text-decoration:none;transition:color 0.2s;" onmouseenter="this.style.color='var(--accent)'" onmouseleave="this.style.color='#2a2a2a'">Terms</a>
+          <span style="color:#1a1a1a;">D7 FOUNDATION // SISTEMA v1.0</span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+<!-- AXIS Tooltip -->
+<div id="d7-tooltip"></div>
+
+<!-- ========== STATUS BAR ========== -->
+<div class="status-bar" id="statusBar">
+  <div class="flex items-center gap-3">
+    <span class="status-dot"></span>
+    <span>D7 Foundation // All Systems Operational</span>
+  </div>
+  <div class="flex items-center gap-6">
+    <span>Módulos: <span style="color:var(--accent);">08</span></span>
+    <span>Status: <span style="color:#00cc66;">Active</span></span>
+    <span id="statusTime"></span>
+  </div>
+</div>
+
+<!-- ========== SCRIPTS ========== -->
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  // ============================================================
+  // PARTICLES.JS
+  // ============================================================
+  if (typeof particlesJS !== 'undefined') {
+    particlesJS('particles-js', {
+      particles: {
+        number: { value: 80, density: { enable: true, value_area: 800 } },
+        color: { value: ['#00FFFF', '#007dff'] },
+        shape: { type: 'circle' },
+        opacity: { value: 0.6, random: true },
+        size: { value: 3, random: true },
+        line_linked: {
+          enable: true,
+          distance: 150,
+          color: '#00FFFF',
+          opacity: 0.2,
+          width: 1
+        },
+        move: {
+          enable: true,
+          speed: 1.2,
+          direction: 'none',
+          random: true,
+          out_mode: 'out'
+        }
+      },
+      interactivity: {
+        detect_on: 'canvas',
+        events: {
+          onhover: { enable: true, mode: 'repulse' },
+          resize: true
+        },
+        modes: {
+          repulse: { distance: 100, duration: 0.4 }
+        }
+      },
+      retina_detect: true
+    });
+    setTimeout(function() {
+      window.dispatchEvent(new Event('resize'));
+    }, 500);
+  }
+
+  // ============================================================
+  // NAV — scroll state
+  // ============================================================
+  const nav = document.getElementById('mainNav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+
+    // Active nav link by section visibility
+    const sections = ['hero', 'modules'];
+    const links = document.querySelectorAll('.nav-link');
+    for (const id of sections) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      const rect = el.getBoundingClientRect();
+      if (rect.top <= 100 && rect.bottom > 100) {
+        links.forEach(l => l.classList.remove('active'));
+        const match = document.querySelector(`.nav-link[href="#${id}"]`);
+        if (match) match.classList.add('active');
+        break;
+      }
+    }
+  }, { passive: true });
+
+  // ============================================================
+  // SCROLL REVEAL — IntersectionObserver
+  // ============================================================
+  const scrollObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate');
+        scrollObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px -4% 0px -4%' });
+
+  document.querySelectorAll('.animate-on-scroll').forEach((el) => {
+    scrollObserver.observe(el);
+  });
+
+  // ============================================================
+  // CAROUSEL
+  // ============================================================
+  const slider   = document.getElementById('slider');
+  const slides   = document.querySelectorAll('.slide-card');
+  const dots     = document.querySelectorAll('.carousel-dot');
+  const prevBtn  = document.getElementById('prevBtn');
+  const nextBtn  = document.getElementById('nextBtn');
+  const TOTAL    = slides.length;
+
+  // Sync dots to visible slide
+  const slideObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const idx = Array.from(slides).indexOf(entry.target);
+        if (idx === -1) return;
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        if (prevBtn) prevBtn.disabled = (idx === 0);
+        if (nextBtn) nextBtn.disabled = (idx === TOTAL - 1);
+      }
+    });
+  }, { root: slider, threshold: 0.55 });
+
+  slides.forEach(s => slideObserver.observe(s));
+
+  // Dot click
+  dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => {
+      slides[i].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    });
+  });
+
+  // Arrow buttons
+  const getScrollAmt = () =>
+    window.innerWidth < 640
+      ? window.innerWidth * 0.82 + 20
+      : window.innerWidth < 768
+        ? window.innerWidth * 0.85 + 20
+        : 488;
+
+  nextBtn?.addEventListener('click', () => slider.scrollBy({ left:  getScrollAmt(), behavior: 'smooth' }));
+  prevBtn?.addEventListener('click', () => slider.scrollBy({ left: -getScrollAmt(), behavior: 'smooth' }));
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') slider.scrollBy({ left:  getScrollAmt(), behavior: 'smooth' });
+    if (e.key === 'ArrowLeft')  slider.scrollBy({ left: -getScrollAmt(), behavior: 'smooth' });
+  });
+
+  // ============================================================
+  // FLASHLIGHT HOVER — stat cards
+  // ============================================================
+  document.querySelectorAll('.flashlight-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+      card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+    });
+  });
+
+  // ============================================================
+  // AXIS CHART ENGINE — D7 adapted
+  // ============================================================
+  const D7 = {
+    bg:       '#0a0a0a',
+    grid:     'rgba(255,255,255,0.06)',
+    white:    '#ffffff',
+    grey:     'rgba(255,255,255,0.18)',
+    darkGrey: 'rgba(255,255,255,0.04)',
+    accent:   '#01bbff',
+    text:     '#999999'
+  };
+
+  const _map = (val, a, b, c, d) => (val - a) * (d - c) / (b - a) + c;
+
+  const bezierPath = (pts) => {
+    let d = `M ${pts[0].x},${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) {
+      const p = pts[i - 1], n = pts[i];
+      const cp1x = p.x + (n.x - p.x) * 0.5, cp2x = n.x - (n.x - p.x) * 0.5;
+      d += ` C ${cp1x},${p.y} ${cp2x},${n.y} ${n.x},${n.y}`;
+    }
+    return d;
+  };
+
+  const tt = document.getElementById('d7-tooltip');
+  const showTT = (e, txt) => {
+    if (!tt) return;
+    tt.textContent = txt;
+    tt.style.opacity = 1;
+    tt.style.left = (e.clientX + 12) + 'px';
+    tt.style.top  = (e.clientY + 12) + 'px';
+  };
+  const hideTT = () => { if (tt) tt.style.opacity = 0; };
+
+    // ============================================================
+  // STATUS BAR clock
+  // ============================================================
+  const timeEl = document.getElementById('statusTime');
+  if (timeEl) {
+    const tick = () => {
+      const now = new Date();
+      timeEl.textContent = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    };
+    tick();
+    setInterval(tick, 1000);
+  }
+
+});
+</script>
+
+</body>
+</html>
