@@ -170,6 +170,7 @@ const TOOL_PROMPTS = {
   email_mkt:"Voce e especialista em e-mail marketing. Escreva campanha persuasiva com assunto, corpo e CTA eficazes.",
   descricao:"Voce e especialista em copywriting. Escreva descricao de produto irresistivel focando em beneficios e valor.",
   orcamento:"Voce e especialista financeiro. Gere um orcamento profissional detalhado com itens, valores, condicoes e validade.",
+  fluxo_caixa:"Voce e especialista em financas empresariais. Crie um modelo de fluxo de caixa mensal estruturado com entradas, saidas e saldo.",
   precificacao:"Voce e especialista em precificacao de servicos. Calcule e justifique o preco ideal considerando custos, margem e mercado.",
   nf_descritiva:"Voce e especialista fiscal. Escreva descricao clara e adequada para emissao de nota fiscal de servico.",
   lgpd:"Voce e especialista em LGPD e direito digital. Gere politica de privacidade completa e adequada a legislacao brasileira.",
@@ -193,7 +194,7 @@ const TOOL_PROMPTS = {
   pesq_satisfacao:"Voce e especialista em NPS. Crie pesquisa de satisfacao com perguntas estrategicas e escala de avaliacao.",
   faq_produto:"Voce e especialista em produto. Crie FAQ completo respondendo as principais duvidas dos usuarios.",
   planilha_orcamento:"Voce e especialista financeiro. Crie um orcamento detalhado em formato de tabela com: Item, Descricao, Quantidade, Valor Unitario, Valor Total. Inclua cabecalho com dados da empresa, cliente, data e validade. Ao final, inclua totais e condicoes de pagamento. Formate como CSV para conversao em Excel.",
-  planilha_fluxo:"Você é especialista financeiro. Crie fluxo de caixa mensal em formato de tabela CSV (separado por vírgulas) com colunas: Categoria, Tipo (Entrada/Saida), Jan, Fev, Mar, Abr, Mai, Jun, Jul, Ago, Set, Out, Nov, Dez, Total. REGRAS OBRIGATÓRIAS: 1) NUNCA use blocos de código markdown. Responda apenas com o texto bruto. 2) Não coloque símbolos de moeda (R$), apenas os números limpos. 3) Para as linhas de 'Totais' ou 'Saldos', não invente o resultado numérico, gere a FÓRMULA exata do Excel em inglês (Exemplo: =B2-C2-D2 ou =SUM(B2:B10)).",
+  planilha_fluxo:"Voce e especialista financeiro. Crie fluxo de caixa mensal em formato de tabela CSV com colunas: Categoria, Tipo (Entrada/Saida), Jan, Fev, Mar, Abr, Mai, Jun, Jul, Ago, Set, Out, Nov, Dez, Total. Inclua grupos: Receitas Operacionais, Custos Fixos, Custos Variaveis, Investimentos, Saldo.",
   apresentacao_ppt:"Voce e especialista em apresentacoes executivas. Crie roteiro detalhado de apresentacao profissional com: Titulo de cada slide, Conteudo principal (topicos), Nota do apresentador. Formate cada slide claramente para conversao em PowerPoint.",
   relatorio_pdf:"Voce e especialista em comunicacao executiva. Gere relatorio executivo completo e profissional com: Capa, Sumario Executivo, Analise Detalhada, Graficos em texto (ASCII), Conclusoes e Recomendacoes. Use formatacao clara com secoes e subsecoes.",
 };
@@ -281,29 +282,14 @@ function PlanBadge({ plan }) {
 async function downloadAsExcel(content, filename) {
   try {
     const XLSX = await import("https://cdn.sheetjs.com/xlsx-0.20.1/package/xlsx.mjs");
-    
-    // Remove qualquer lixo de markdown e linhas vazias
-    const lines = content.split("\n").filter(l => l.trim() !== "" && !l.includes("```"));
-
-    const data = lines.map(l => l.split(",").map(c => {
-      let val = c.trim().replace(/^"|"$/g,"");
-      
-      // Se começar com '=', avisa o Excel que é uma Fórmula!
-      if (val.startsWith("=")) return { f: val.substring(1) };
-      
-      // Se for um número válido, avisa o Excel para formatar como Número (e não texto)
-      if (!isNaN(val) && val !== "") return Number(val);
-      
-      return val;
-    }));
-
+    const lines = content.split("\n").filter(l => l.trim());
+    const data = lines.map(l => l.split(",").map(c => c.trim().replace(/^"|"$/g,"")));
     const ws = XLSX.utils.aoa_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Arcane");
     XLSX.writeFile(wb, filename + ".xlsx");
     return true;
   } catch(e) {
-    console.error(e);
     // fallback: download CSV
     const blob = new Blob([content], { type:"text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -987,4 +973,25 @@ function LandingPage({ onLogin, onRegister }) {
       </footer>
     </div>
   );
+}
+
+// ─── ROOT ────────────────────────────────────────────────────────────────────
+
+export default function App() {
+  const [screen, setScreen] = useState("landing");
+  const [user,   setUser]   = useState(null);
+
+  React.useEffect(()=>{
+    const token     = localStorage.getItem("arcane_token");
+    const savedUser = localStorage.getItem("arcane_user");
+    if (token&&savedUser) { try { setUser(JSON.parse(savedUser)); setScreen("app"); } catch(e){} }
+  },[]);
+
+  const handleAuthSuccess = (u) => { setUser(u); setScreen("app"); };
+  const handleLogout = () => { localStorage.removeItem("arcane_token"); localStorage.removeItem("arcane_user"); setUser(null); setScreen("landing"); };
+
+  if (screen==="app"&&user)    return <AppDashboard user={user} onLogout={handleLogout} />;
+  if (screen==="login")        return <AuthPage mode="login"    onSuccess={handleAuthSuccess} onSwitch={()=>setScreen("register")} />;
+  if (screen==="register")     return <AuthPage mode="register" onSuccess={handleAuthSuccess} onSwitch={()=>setScreen("login")} />;
+  return <LandingPage onLogin={()=>setScreen("login")} onRegister={()=>setScreen("register")} />;
 }
