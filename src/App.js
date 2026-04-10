@@ -797,7 +797,7 @@ function AppDashboard({ user, onLogout }) {
         body: JSON.stringify({ tool: activeTool.id, input: input }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erro ao gerar");
+      if (res.status === 422 || res.status === 401) { localStorage.removeItem("arcane_token"); localStorage.removeItem("arcane_user"); window.location.reload(); return; } if (!res.ok) throw new Error(data.error || "Erro ao gerar");
       setResult(data.result || data.content || "");
       // fetchUsage();
     } catch (e) { setToast(e.message); }
