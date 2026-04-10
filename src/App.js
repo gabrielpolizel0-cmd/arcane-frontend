@@ -1,635 +1,1135 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
-// ═══════════════════════════════════════════════
-// CONFIGURAÇÃO
-// ═══════════════════════════════════════════════
 const MODE = "prod";
 const BACKEND_URL = "https://arcane-backend-production-d37b.up.railway.app/api";
 
-// ═══════════════════════════════════════════════
-// API HELPERS
-// ═══════════════════════════════════════════════
-async function callAI(toolId, userInput) {
-  if (MODE === "prod") {
-    const token = localStorage.getItem("arcane_token");
-    const res = await fetch(`${BACKEND_URL}/ai/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ tool: toolId, input: userInput }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Erro na geração");
-    return data.output;
+const COLORS = {
+  navy: "#0a0f1e",
+  navyLight: "#0d1528",
+  navyMid: "#111c35",
+  gold: "#c9a84c",
+  goldLight: "#e2c47a",
+  goldDark: "#a07830",
+  white: "#f0ece0",
+  gray: "#8892a4",
+  grayLight: "#c8d0dc",
+};
+
+const globalStyles = `
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: ${COLORS.navy};
+    color: ${COLORS.white};
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
   }
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 1500,
-      system: toolId,
-      messages: [{ role: "user", content: userInput }],
-    }),
-  });
-  const data = await res.json();
-  return data.content?.map((b) => b.text || "").join("\n") || "Erro ao processar.";
-}
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: ${COLORS.navy}; }
+  ::-webkit-scrollbar-thumb { background: ${COLORS.gold}; border-radius: 3px; }
 
-async function apiCall(path, { method = "GET", body, token } = {}) {
-  const headers = { "Content-Type": "application/json" };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(`${BACKEND_URL}${path}`, { method, headers, body: body ? JSON.stringify(body) : undefined });
-  const data = await res.json();
-  if (!res.ok) throw { status: res.status, ...data };
-  return data;
-}
+  .gold { color: ${COLORS.gold}; }
+  .serif { font-family: 'Cormorant Garamond', serif; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes rotateSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .animate-fadeUp { animation: fadeUp 0.8s ease forwards; }
+  .animate-fadeIn { animation: fadeIn 0.6s ease forwards; }
+
+  input, textarea, select {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(201,168,76,0.3);
+    color: ${COLORS.white};
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: 'Jost', sans-serif;
+    font-size: 14px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  input:focus, textarea:focus {
+    border-color: ${COLORS.gold};
+    background: rgba(201,168,76,0.05);
+  }
+  input::placeholder, textarea::placeholder { color: ${COLORS.gray}; }
+
+  button {
+    cursor: pointer;
+    font-family: 'Jost', sans-serif;
+    border: none;
+    transition: all 0.3s ease;
+  }
+
+  .btn-gold {
+    background: linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldDark});
+    color: ${COLORS.navy};
+    padding: 14px 32px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .btn-gold:hover {
+    background: linear-gradient(135deg, ${COLORS.goldLight}, ${COLORS.gold});
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(201,168,76,0.4);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: ${COLORS.gold};
+    padding: 13px 32px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: 1px solid ${COLORS.gold};
+  }
+  .btn-outline:hover {
+    background: rgba(201,168,76,0.1);
+    transform: translateY(-2px);
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, ${COLORS.gold}, transparent);
+    margin: 60px auto;
+    max-width: 400px;
+  }
+
+  .gold-line {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, ${COLORS.gold}, ${COLORS.goldLight});
+    margin: 16px 0;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 8px;
+    padding: 32px;
+    transition: all 0.3s;
+  }
+  .card:hover {
+    border-color: rgba(201,168,76,0.4);
+    background: rgba(201,168,76,0.05);
+    transform: translateY(-4px);
+  }
+
+  .section {
+    padding: 100px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 300;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+
+  .section-subtitle {
+    color: ${COLORS.gray};
+    font-size: 16px;
+    line-height: 1.7;
+    max-width: 560px;
+  }
+
+  .tag {
+    display: inline-block;
+    background: rgba(201,168,76,0.1);
+    color: ${COLORS.gold};
+    border: 1px solid rgba(201,168,76,0.3);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .sidebar {
+    width: 260px;
+    min-height: 100vh;
+    background: ${COLORS.navyLight};
+    border-right: 1px solid rgba(201,168,76,0.15);
+    display: flex;
+    flex-direction: column;
+    padding: 32px 0;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
+  }
+
+  .sidebar-logo {
+    padding: 0 28px 32px;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    margin-bottom: 32px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 28px;
+    color: ${COLORS.gray};
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    border-left: 2px solid transparent;
+  }
+  .nav-item:hover { color: ${COLORS.white}; background: rgba(255,255,255,0.03); }
+  .nav-item.active { color: ${COLORS.gold}; border-left-color: ${COLORS.gold}; background: rgba(201,168,76,0.05); }
+
+  .main-content {
+    margin-left: 260px;
+    min-height: 100vh;
+    background: ${COLORS.navy};
+  }
+
+  .topbar {
+    height: 64px;
+    background: ${COLORS.navyLight};
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .usage-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .usage-fill {
+    height: 100%;
+    background: linear-gradient(90deg, ${COLORS.gold}, ${COLORS.goldLight});
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  .tool-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(201,168,76,0.12);
+    border-radius: 8px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .tool-card:hover {
+    border-color: rgba(201,168,76,0.4);
+    background: rgba(201,168,76,0.05);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+
+  .result-box {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 8px;
+    padding: 24px;
+    min-height: 200px;
+    font-size: 14px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    color: ${COLORS.grayLight};
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: ${COLORS.navyMid};
+    border: 1px solid ${COLORS.gold};
+    color: ${COLORS.white};
+    padding: 16px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 9999;
+    animation: fadeUp 0.3s ease;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+`;
 
 // ═══════════════════════════════════════════════
-// DADOS DOS MÓDULOS
+// DADOS
 // ═══════════════════════════════════════════════
+
 const MODULES = [
   {
-    id: "docs", icon: "◆", label: "Documentos", title: "Automação de Documentos",
-    desc: "Contratos, propostas, relatórios e e-mails corporativos", accent: "#2563EB",
+    id: "documentos", icon: "◈", label: "Documentos", color: COLORS.gold,
     tools: [
-      { id: "contrato", name: "Gerar Contrato", icon: "📜", ph: "Descreva o tipo de contrato, partes envolvidas e cláusulas principais...", prompt: "Você é um assistente jurídico empresarial. Gere um modelo de contrato profissional baseado na descrição. Inclua cláusulas padrão, obrigações das partes e condições gerais. Responda em português do Brasil." },
-      { id: "proposta", name: "Proposta Comercial", icon: "💼", ph: "Descreva o serviço/produto, cliente-alvo e condições...", prompt: "Você é um consultor comercial. Crie uma proposta comercial profissional e persuasiva. Inclua escopo, benefícios, investimento e próximos passos. Responda em português do Brasil." },
-      { id: "relatorio", name: "Relatório Executivo", icon: "📊", ph: "Descreva os dados ou o tema do relatório...", prompt: "Você é um analista de negócios. Gere um relatório executivo profissional com introdução, análise, conclusões e recomendações. Responda em português do Brasil." },
-      { id: "email_corp", name: "E-mail Corporativo", icon: "✉️", ph: "Descreva o contexto, destinatário e objetivo do e-mail...", prompt: "Você é um comunicador corporativo. Escreva um e-mail profissional, claro e objetivo. Adapte o tom ao contexto. Responda em português do Brasil." },
-    ],
+      { id: "contrato", name: "Gerar Contrato", desc: "Contratos profissionais personalizados", prompt: "Você é especialista em direito empresarial brasileiro. Gere um contrato profissional e completo baseado nas informações fornecidas. Use linguagem jurídica adequada." },
+      { id: "proposta", name: "Proposta Comercial", desc: "Propostas persuasivas e profissionais", prompt: "Você é especialista em vendas B2B. Crie uma proposta comercial persuasiva, estruturada e profissional." },
+      { id: "relatorio", name: "Relatório Executivo", desc: "Relatórios claros e impactantes", prompt: "Você é especialista em comunicação executiva. Crie um relatório executivo claro, estruturado e impactante." },
+      { id: "email_corp", name: "E-mail Corporativo", desc: "Comunicações formais e eficazes", prompt: "Você é especialista em comunicação corporativa. Escreva um e-mail profissional, claro e persuasivo." },
+    ]
   },
   {
-    id: "data", icon: "◈", label: "Dados", title: "Análise de Dados",
-    desc: "Converse com seus dados em linguagem natural", accent: "#059669",
+    id: "dados", icon: "◇", label: "Dados", color: "#6bb5ff",
     tools: [
-      { id: "analise", name: "Analisar Dados", icon: "📈", ph: "Cole dados ou descreva a planilha...", prompt: "Você é um analista de dados sênior. Analise os dados fornecidos, identifique tendências, outliers e insights acionáveis. Responda em português do Brasil." },
-      { id: "dashboard_text", name: "Gerar Insights", icon: "🔍", ph: "Descreva seus KPIs ou cole métricas...", prompt: "Você é um consultor de BI. Gere insights estratégicos a partir dos KPIs fornecidos. Responda em português do Brasil." },
-      { id: "sql", name: "Gerar Query SQL", icon: "🗄️", ph: "Descreva as tabelas e o que quer consultar...", prompt: "Você é um DBA experiente. Gere queries SQL otimizadas. Explique a lógica. Responda em português do Brasil." },
-      { id: "previsao", name: "Previsão e Tendência", icon: "🔮", ph: "Forneça dados históricos e o que deseja prever...", prompt: "Você é um estatístico. Analise os dados e forneça previsão com cenários otimista, realista e pessimista. Responda em português do Brasil." },
-    ],
+      { id: "analise", name: "Análise de Dados", desc: "Insights estratégicos dos seus dados", prompt: "Você é analista de dados sênior. Analise os dados fornecidos e gere insights estratégicos com linguagem clara para gestores." },
+      { id: "query", name: "Gerar Query SQL", desc: "Consultas SQL otimizadas", prompt: "Você é especialista em banco de dados. Gere uma query SQL otimizada e bem comentada." },
+      { id: "previsao", name: "Previsão e Tendências", desc: "Antecipe cenários do seu negócio", prompt: "Você é especialista em business intelligence. Analise e projete tendências com base nos dados fornecidos." },
+      { id: "kpis", name: "Definir KPIs", desc: "Métricas certas para seu negócio", prompt: "Você é especialista em gestão por indicadores. Sugira KPIs relevantes e como mensurá-los." },
+    ]
   },
   {
-    id: "produtividade", icon: "◇", label: "Produtividade", title: "Hub de Produtividade",
-    desc: "Reuniões, atas, onboarding e base de conhecimento", accent: "#D97706",
+    id: "produtividade", icon: "◉", label: "Produtividade", color: "#7ed89a",
     tools: [
-      { id: "ata", name: "Ata de Reunião", icon: "📝", ph: "Cole as anotações ou transcrição da reunião...", prompt: "Você é um assistente executivo. Transforme as anotações em ata profissional com participantes, pauta, decisões e ações pendentes. Responda em português do Brasil." },
-      { id: "resumo_reuniao", name: "Resumir Reunião", icon: "⚡", ph: "Cole a transcrição ou pontos discutidos...", prompt: "Você é um assistente executivo. Resuma a reunião de forma objetiva: decisões, próximos passos e responsáveis. Responda em português do Brasil." },
-      { id: "onboarding", name: "Guia de Onboarding", icon: "🚀", ph: "Descreva o cargo e processos da empresa...", prompt: "Você é especialista em RH. Crie um guia de onboarding completo para novo colaborador. Responda em português do Brasil." },
-      { id: "knowledge", name: "Base de Conhecimento", icon: "📚", ph: "Descreva o processo ou política a documentar...", prompt: "Você é um technical writer. Crie documentação clara e estruturada do processo descrito. Responda em português do Brasil." },
-    ],
+      { id: "ata", name: "Ata de Reunião", desc: "Documente decisões com clareza", prompt: "Você é especialista em comunicação empresarial. Gere uma ata de reunião profissional e estruturada." },
+      { id: "resumo", name: "Resumir Documento", desc: "Sínteses executivas precisas", prompt: "Você é especialista em síntese de informações. Resuma o conteúdo de forma clara, destacando pontos-chave." },
+      { id: "onboarding", name: "Plano de Onboarding", desc: "Integre novos colaboradores", prompt: "Você é especialista em gestão de pessoas. Crie um plano de onboarding estruturado e acolhedor." },
+      { id: "base_conhecimento", name: "Base de Conhecimento", desc: "Organize o saber da empresa", prompt: "Você é especialista em gestão do conhecimento. Estruture as informações em uma base de conhecimento clara." },
+    ]
   },
   {
-    id: "conteudo", icon: "◉", label: "Conteúdo", title: "Geração de Conteúdo",
-    desc: "Marketing, redes sociais, SEO e copywriting", accent: "#DB2777",
+    id: "conteudo", icon: "◆", label: "Conteúdo", color: "#c78fff",
     tools: [
-      { id: "post_social", name: "Post Redes Sociais", icon: "📱", ph: "Descreva o produto/serviço e rede social...", prompt: "Você é um social media manager. Crie posts engajantes com texto, hashtags e CTA. Responda em português do Brasil." },
-      { id: "blog", name: "Artigo para Blog", icon: "✍️", ph: "Tema, público-alvo e palavras-chave...", prompt: "Você é redator SEO. Escreva artigo otimizado com título atrativo, subtítulos estratégicos e CTA. Responda em português do Brasil." },
-      { id: "email_mkt", name: "E-mail Marketing", icon: "📧", ph: "Descreva a campanha e público-alvo...", prompt: "Você é copywriter de e-mail marketing. Crie e-mail com assunto irresistível, corpo persuasivo e CTA claro. Responda em português do Brasil." },
-      { id: "descricao", name: "Descrição de Produto", icon: "🏷️", ph: "Descreva o produto e público-alvo...", prompt: "Você é copywriter de e-commerce. Crie descrição persuasiva e otimizada para SEO. Responda em português do Brasil." },
-    ],
+      { id: "post_social", name: "Post para Redes Sociais", desc: "Conteúdo que engaja e converte", prompt: "Você é especialista em marketing digital. Crie posts envolventes e estratégicos para redes sociais." },
+      { id: "blog", name: "Artigo para Blog", desc: "Conteúdo que posiciona sua marca", prompt: "Você é especialista em content marketing e SEO. Escreva um artigo completo, envolvente e otimizado." },
+      { id: "email_mkt", name: "E-mail Marketing", desc: "Campanhas que geram resultados", prompt: "Você é especialista em e-mail marketing. Escreva um e-mail de campanha persuasivo e com alto potencial de conversão." },
+      { id: "descricao", name: "Descrição de Produto", desc: "Textos que vendem mais", prompt: "Você é especialista em copywriting. Escreva uma descrição de produto irresistível que destaca benefícios e gera desejo." },
+    ]
   },
 ];
 
 const PLANS = [
-  { id: "free", name: "Free", price: "R$ 0", sub: "", users: "1 user", gens: "5 generations/month", features: ["4 modules", "Basic access"], hl: false },
-  { id: "starter", name: "Starter", price: "R$ 97", sub: "/mo", users: "3 users", gens: "150 generations/month", features: ["Everything in Free", "3 users", "Email support", "30-day history"], hl: false },
-  { id: "business", name: "Business", price: "R$ 297", sub: "/mo", users: "15 users", gens: "500 generations/month", features: ["Everything in Starter", "15 users", "API access", "Priority support", "Full history"], hl: true },
-  { id: "unlimited", name: "Unlimited", price: "R$ 897", sub: "/mo", users: "Unlimited", gens: "Unlimited", features: ["Everything in Business", "Unlimited users", "Unlimited generations", "Custom AI", "Dedicated SLA", "Custom integration"], hl: false },
+  { id: "free", name: "Free", price: "R$ 0", period: "", gens: "5 gerações/mês", users: "1 usuário", highlight: false, features: ["4 módulos completos", "Acesso básico", "Suporte por e-mail"] },
+  { id: "starter", name: "Starter", price: "R$ 97", period: "/mês", gens: "150 gerações/mês", users: "3 usuários", highlight: false, features: ["Tudo do Free", "3 usuários", "Suporte prioritário", "Histórico 30 dias"] },
+  { id: "business", name: "Business", price: "R$ 297", period: "/mês", gens: "500 gerações/mês", users: "15 usuários", highlight: true, features: ["Tudo do Starter", "15 usuários", "Acesso à API", "Histórico completo", "Suporte dedicado"] },
+  { id: "unlimited", name: "Unlimited", price: "R$ 897", period: "/mês", gens: "Gerações ilimitadas", users: "Usuários ilimitados", highlight: false, features: ["Tudo do Business", "Usuários ilimitados", "IA personalizada", "SLA dedicado", "Integração customizada", "Treinamento da equipe"] },
+];
+
+const TESTIMONIALS = [
+  { name: "Fernanda Oliveira", role: "CEO, Construtora Horizonte", text: "O Arcane transformou nossa produção de contratos. O que levava 2 horas, agora fazemos em 5 minutos. Impressionante.", avatar: "F" },
+  { name: "Rafael Mendes", role: "Diretor Comercial, LogTech", text: "Nossas propostas ficaram muito mais profissionais. Fechamos 40% mais negócios no primeiro mês usando o Arcane.", avatar: "R" },
+  { name: "Camila Santos", role: "Gerente de Marketing, Viva Moda", text: "A qualidade do conteúdo gerado é surpreendente. Economizamos R$ 8.000/mês em agência de conteúdo.", avatar: "C" },
+];
+
+const FAQS = [
+  { q: "Preciso saber programar para usar o Arcane?", a: "Não! O Arcane foi desenvolvido para qualquer profissional. A interface é intuitiva e você começa a gerar resultados em minutos, sem nenhum conhecimento técnico." },
+  { q: "Os dados da minha empresa ficam seguros?", a: "Sim. Utilizamos criptografia de ponta a ponta e seus dados nunca são usados para treinar modelos de IA. Seguimos todas as diretrizes da LGPD." },
+  { q: "Posso cancelar a qualquer momento?", a: "Sim, sem taxas ou burocracia. Você pode cancelar sua assinatura quando quiser diretamente pelo painel." },
+  { q: "O plano Free tem limitações?", a: "O plano Free oferece 5 gerações por mês para você experimentar a plataforma. Para uso profissional, recomendamos o Starter ou Business." },
+  { q: "Como funciona o suporte?", a: "Planos pagos têm suporte via e-mail com resposta em até 24h. O plano Business inclui suporte prioritário e o Unlimited tem gerente de conta dedicado." },
+];
+
+const COMPARISON = [
+  { feature: "Gerações mensais", arcane: "Até ilimitado", chatgpt: "Limitado", concorrente: "Limitado" },
+  { feature: "Focado em empresas", arcane: "✓", chatgpt: "✗", concorrente: "Parcial" },
+  { feature: "Templates prontos", arcane: "✓", chatgpt: "✗", concorrente: "✓" },
+  { feature: "Histórico de gerações", arcane: "✓", chatgpt: "✓", concorrente: "✗" },
+  { feature: "Multi-usuários", arcane: "✓", chatgpt: "✗", concorrente: "✓" },
+  { feature: "Suporte em português", arcane: "✓", chatgpt: "Parcial", concorrente: "✗" },
+  { feature: "Preço acessível", arcane: "✓", chatgpt: "✗", concorrente: "✗" },
 ];
 
 // ═══════════════════════════════════════════════
-// COMPONENTS
+// COMPONENTES
 // ═══════════════════════════════════════════════
-function StreamText({ text }) {
-  const [s, setS] = useState("");
-  const i = useRef(0);
-  useEffect(() => {
-    setS(""); i.current = 0;
-    const t = setInterval(() => { if (i.current < text.length) setS(text.slice(0, ++i.current)); else clearInterval(t); }, 6);
-    return () => clearInterval(t);
-  }, [text]);
-  return <span>{s}{i.current < text.length && <span style={{ animation: "blink .6s infinite" }}>▎</span>}</span>;
+
+function Logo({ size = 24 }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div style={{
+        width: size + 8, height: size + 8,
+        background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldDark})`,
+        borderRadius: 6,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: size * 0.6, fontWeight: 700, color: COLORS.navy,
+        fontFamily: "Cormorant Garamond, serif",
+      }}>A</div>
+      <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: size, fontWeight: 400, letterSpacing: 2, color: COLORS.white }}>ARCANE</span>
+    </div>
+  );
+}
+
+function Toast({ message, onClose }) {
+  useEffect(() => { const t = setTimeout(onClose, 3000); return () => clearTimeout(t); }, [onClose]);
+  return <div className="toast">{message}</div>;
 }
 
 // ═══════════════════════════════════════════════
-// MAIN APP
+// LANDING PAGE
 // ═══════════════════════════════════════════════
-export default function App() {
-  const [page, setPage] = useState("landing");
-  const [authPage, setAuthPage] = useState("login");
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [activeModule, setActiveModule] = useState(null);
-  const [activeTool, setActiveTool] = useState(null);
-  const [sideOpen, setSideOpen] = useState(true);
-  const [input, setInput] = useState("");
-  const [output, setOutput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [usage, setUsage] = useState({ current: 0, limit: 500, remaining: 500 });
-  const [history, setHistory] = useState([]);
-  const [authForm, setAuthForm] = useState({ name: "", email: "", password: "", team_name: "" });
-  const [authError, setAuthError] = useState("");
-  const [authLoading, setAuthLoading] = useState(false);
-  const [toast, setToast] = useState(null);
-  const resRef = useRef(null);
 
-  const showToast = (msg, type = "success") => { setToast({ msg, type }); setTimeout(() => setToast(null), 3500); };
+function LandingPage({ onLogin, onRegister }) {
+  const [openFaq, setOpenFaq] = useState(null);
 
-  // Auth
-  const handleLogin = async () => {
-    setAuthLoading(true); setAuthError("");
-    try {
-      const d = await apiCall("/auth/login", { method: "POST", body: { email: authForm.email, password: authForm.password } });
-      setToken(d.access_token); setUser(d.user); setPage("dashboard");
-      localStorage.setItem("arcane_token", d.access_token);
-      showToast(`Bem-vindo, ${d.user.name}!`);
-    } catch (e) { setAuthError(e.error || "Erro ao fazer login"); }
-    setAuthLoading(false);
-  };
-
-  const handleRegister = async () => {
-    setAuthLoading(true); setAuthError("");
-    try {
-      const d = await apiCall("/auth/register", { method: "POST", body: authForm });
-      setToken(d.access_token); setUser(d.user); setPage("dashboard");
-      localStorage.setItem("arcane_token", d.access_token);
-      showToast("Conta criada!");
-    } catch (e) { setAuthError(e.error || "Erro ao criar conta"); }
-    setAuthLoading(false);
-  };
-
-  const logout = () => { setUser(null); setToken(null); setPage("landing"); setActiveModule(null); setActiveTool(null); setOutput(""); setInput(""); localStorage.removeItem("arcane_token"); };
-
-  // Navigation
-  const goModule = (m) => { setActiveModule(m); setActiveTool(null); setOutput(""); setInput(""); setPage("module"); };
-  const goTool = (t) => { setActiveTool(t); setOutput(""); setInput(""); setPage("tool"); };
-  const goBack = () => { if (page === "tool") { setActiveTool(null); setPage("module"); } else { setActiveModule(null); setPage("dashboard"); } setOutput(""); setInput(""); };
-
-  // Generate
-  const generate = async () => {
-    if (!input.trim() || loading || !activeTool) return;
-    setLoading(true); setOutput("");
-    try {
-      const text = await callAI(activeTool.id, input);
-      setOutput(text);
-      setUsage(u => ({ ...u, current: u.current + 1, remaining: Math.max(0, u.remaining - 1) }));
-      setHistory(h => [{ tool: activeTool.name, module: activeModule.label, date: new Date().toLocaleString("pt-BR"), preview: text.slice(0, 80) + "..." }, ...h].slice(0, 30));
-      showToast("Gerado com sucesso!");
-    } catch (e) { setOutput("Erro: " + (e.message || "Falha na geração")); }
-    setLoading(false);
-  };
-
-  useEffect(() => { if (output && resRef.current) resRef.current.scrollIntoView({ behavior: "smooth" }); }, [output]);
-
-  const breadcrumb = () => {
-    if (page === "dashboard") return "Dashboard";
-    if (page === "module") return activeModule?.label;
-    if (page === "tool") return `${activeModule?.label} / ${activeTool?.name}`;
-    if (page === "history") return "Histórico";
-    if (page === "plans") return "Planos";
-    return "";
-  };
-
-  // ═══════════════════════════════════════════
-  // LANDING PAGE
-  // ═══════════════════════════════════════════
-  if (page === "landing") {
-    return (
-      <div>
-        <style>{CSS}</style>
-        <nav className="landing-nav">
-          <div className="landing-nav-inner">
-            <div className="nav-logo"><div className="nav-logo-mark">A</div><span className="nav-logo-text">Arcane</span></div>
-            <div className="nav-links">
-              <span className="nav-link" onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}>Módulos</span>
-              <span className="nav-link" onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}>Planos</span>
-              <button className="nav-cta" onClick={() => { setPage("auth"); setAuthPage("login"); }}>Entrar</button>
-            </div>
-          </div>
-        </nav>
-
-        <section className="hero">
-          <div className="hero-inner">
-            <p className="hero-tag">WORKSPACE INTELIGENTE PARA EMPRESAS</p>
-            <h1 className="hero-title">Automatize o trabalho<br />que consome <em>horas</em></h1>
-            <p className="hero-sub">Documentos, dados, produtividade e conteúdo — tudo com inteligência artificial de última geração, numa única plataforma.</p>
-            <div className="hero-actions">
-              <button className="hero-btn-primary" onClick={() => { setPage("auth"); setAuthPage("register"); }}>Começar grátis</button>
-              <button className="hero-btn-secondary" onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}>Ver módulos</button>
-            </div>
-            <p className="hero-note">Sem cartão de crédito · Setup em 2 minutos · 500 gerações grátis</p>
-          </div>
-        </section>
-
-        <section id="features" className="features-section">
-          <div className="features-inner">
-            <p className="section-tag">MÓDULOS</p>
-            <h2 className="section-headline">16 ferramentas de IA.<br /><em>4 módulos poderosos.</em></h2>
-            <div className="features-grid">
-              {MODULES.map((m, i) => (
-                <div key={m.id} className="feature-card" style={{ borderTopColor: m.accent, animationDelay: `${i * 100}ms` }}>
-                  <div className="feature-icon" style={{ color: m.accent }}>{m.icon}</div>
-                  <h3 className="feature-title">{m.title}</h3>
-                  <p className="feature-desc">{m.desc}</p>
-                  <div className="feature-tools">
-                    {m.tools.map(t => <span key={t.id} className="feature-tool-tag">{t.icon} {t.name}</span>)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="pricing" className="pricing-section">
-          <div className="pricing-inner">
-            <p className="section-tag">PLANOS</p>
-            <h2 className="section-headline">Simples, transparente.<br /><em>Escale quando precisar.</em></h2>
-            <div className="pricing-grid">
-              {PLANS.map((p, i) => (
-                <div key={p.id} className={`price-card ${p.hl ? "price-hl" : ""}`} style={{ animationDelay: `${i * 80}ms` }}>
-                  {p.hl && <div className="price-badge">MAIS POPULAR</div>}
-                  <h3 className="price-name">{p.name}</h3>
-                  <div className="price-amount">{p.price}<span className="price-period">{p.sub}</span></div>
-                  <div className="price-meta">{p.users} · {p.gens}</div>
-                  <div className="price-features">{p.features.map(f => <div key={f} className="price-feature">✓ {f}</div>)}</div>
-                  <button className={`price-cta ${p.hl ? "price-cta-primary" : ""}`} onClick={() => { setPage("auth"); setAuthPage("register"); }}>
-                    {p.id === "enterprise" ? "Falar com Vendas" : "Começar agora"}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <footer className="landing-footer">
-          <div className="footer-inner">
-            <div className="footer-logo"><div className="nav-logo-mark">A</div><span className="nav-logo-text">Arcane</span></div>
-            <p className="footer-text">© 2026 Arcane · Workspace inteligente com IA para empresas</p>
-          </div>
-        </footer>
-      </div>
-    );
-  }
-
-  // ═══════════════════════════════════════════
-  // AUTH SCREEN
-  // ═══════════════════════════════════════════
-  if (page === "auth") {
-    const isLogin = authPage === "login";
-    return (
-      <div className="auth-wrap">
-        <style>{CSS}</style>
-        <div className="auth-left">
-          <div className="auth-left-content">
-            <div className="auth-logo" onClick={() => setPage("landing")} style={{ cursor: "pointer" }}>
-              <div className="nav-logo-mark">A</div><span style={{ fontFamily: "var(--fd)", fontSize: 24, fontWeight: 500, color: "#F7F6F3" }}>Arcane</span>
-            </div>
-            <h1 className="auth-headline">O workspace inteligente<br /><em>que sua empresa precisa</em></h1>
-            <p className="auth-sub">16 ferramentas de IA organizadas em 4 módulos — documentos, dados, produtividade e conteúdo.</p>
-            <div className="auth-features">{MODULES.map(m => (
-              <div key={m.id} className="auth-feat"><span style={{ color: m.accent, fontWeight: 700, fontSize: 16 }}>{m.icon}</span><div><strong>{m.label}</strong><span className="auth-feat-sub">{m.tools.length} ferramentas</span></div></div>
-            ))}</div>
-          </div>
-        </div>
-        <div className="auth-right">
-          <div className="auth-form-box">
-            <h2 className="auth-form-title">{isLogin ? "Entrar" : "Criar conta"}</h2>
-            <p className="auth-form-sub">{isLogin ? "Acesse sua conta para continuar" : "Comece gratuitamente"}</p>
-            {authError && <div className="auth-error">{authError}</div>}
-            <div className="auth-fields">
-              {!isLogin && (<><label className="fl">Seu nome</label><input className="fi" placeholder="João Silva" value={authForm.name} onChange={e => setAuthForm({ ...authForm, name: e.target.value })} /></>)}
-              {!isLogin && (<><label className="fl">Nome da empresa</label><input className="fi" placeholder="Minha Empresa" value={authForm.team_name} onChange={e => setAuthForm({ ...authForm, team_name: e.target.value })} /></>)}
-              <label className="fl">E-mail</label><input className="fi" type="email" placeholder="voce@empresa.com" value={authForm.email} onChange={e => setAuthForm({ ...authForm, email: e.target.value })} onKeyDown={e => e.key === "Enter" && (isLogin ? handleLogin() : handleRegister())} />
-              <label className="fl">Senha</label><input className="fi" type="password" placeholder="Mínimo 6 caracteres" value={authForm.password} onChange={e => setAuthForm({ ...authForm, password: e.target.value })} onKeyDown={e => e.key === "Enter" && (isLogin ? handleLogin() : handleRegister())} />
-            </div>
-            <button className="auth-btn" onClick={isLogin ? handleLogin : handleRegister} disabled={authLoading}>
-              {authLoading ? <span className="dots"><span /><span /><span /></span> : isLogin ? "Entrar" : "Criar conta grátis"}
-            </button>
-            <p className="auth-switch">{isLogin ? "Não tem conta? " : "Já tem conta? "}<span className="auth-switch-link" onClick={() => { setAuthPage(isLogin ? "register" : "login"); setAuthError(""); }}>{isLogin ? "Criar agora" : "Fazer login"}</span></p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ═══════════════════════════════════════════
-  // DASHBOARD (logged in)
-  // ═══════════════════════════════════════════
   return (
-    <div className="app-wrap">
-      <style>{CSS}</style>
-      {toast && <div className={`toast ${toast.type === "error" ? "toast-err" : ""}`}>{toast.type === "success" ? "✓" : "!"} {toast.msg}</div>}
-
-      <aside className={`sb ${sideOpen ? "sb-open" : "sb-closed"}`}>
-        <div className="sb-head"><div className="sb-logo">A</div>{sideOpen && <span className="sb-logo-text">Arcane</span>}</div>
-        {sideOpen && <>
-          <div className="sb-label">Módulos</div>
-          {MODULES.map(m => (
-            <div key={m.id} className={`sb-item ${activeModule?.id === m.id ? "sb-active" : ""}`} onClick={() => goModule(m)}>
-              <span className="sb-icon" style={{ color: m.accent }}>{m.icon}</span><span>{m.label}</span>
-            </div>
+    <div style={{ background: COLORS.navy, minHeight: "100vh" }}>
+      {/* NAV */}
+      <nav style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+        background: "rgba(10,15,30,0.95)", backdropFilter: "blur(20px)",
+        borderBottom: `1px solid rgba(201,168,76,0.15)`,
+        padding: "0 40px", height: 72,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <Logo size={22} />
+        <div style={{ display: "flex", gap: 32, alignItems: "center" }}>
+          {["Módulos", "Planos", "FAQ"].map(item => (
+            <a key={item} href={`#${item.toLowerCase()}`} style={{ color: COLORS.gray, textDecoration: "none", fontSize: 14, letterSpacing: 0.5, transition: "color 0.2s" }}
+              onMouseEnter={e => e.target.style.color = COLORS.gold}
+              onMouseLeave={e => e.target.style.color = COLORS.gray}>
+              {item}
+            </a>
           ))}
-          <div className="sb-label" style={{ marginTop: 20 }}>Geral</div>
-          <div className={`sb-item ${page === "dashboard" && !activeModule ? "sb-active" : ""}`} onClick={() => { setActiveModule(null); setActiveTool(null); setPage("dashboard"); }}><span className="sb-icon">⊞</span><span>Dashboard</span></div>
-          <div className={`sb-item ${page === "history" ? "sb-active" : ""}`} onClick={() => { setActiveModule(null); setPage("history"); }}><span className="sb-icon">◔</span><span>Histórico</span></div>
-          <div className={`sb-item ${page === "plans" ? "sb-active" : ""}`} onClick={() => { setActiveModule(null); setPage("plans"); }}><span className="sb-icon">◈</span><span>Planos</span></div>
-
-          <div className="sb-usage">
-            <div className="sb-usage-lbl">Uso este mês</div>
-            <div className="sb-usage-num">{usage.current}<span className="sb-usage-max"> / {usage.limit >= 999999 ? "∞" : usage.limit}</span></div>
-            <div className="sb-bar"><div className="sb-fill" style={{ width: `${Math.min((usage.current / usage.limit) * 100, 100)}%` }} /></div>
-          </div>
-
-          <div className="sb-user">
-            <div className="sb-avatar">{user?.name?.[0]?.toUpperCase() || "U"}</div>
-            <div className="sb-user-info"><div className="sb-user-name">{user?.name}</div><div className="sb-user-plan">{(user?.plan || "starter").toUpperCase()}</div></div>
-            <button className="sb-logout" onClick={logout}>↗</button>
-          </div>
-        </>}
-      </aside>
-
-      <main className="mn">
-        <div className="topbar">
-          <button className="tb-toggle" onClick={() => setSideOpen(!sideOpen)}>{sideOpen ? "◂" : "▸"}</button>
-          <span className="tb-bc">{breadcrumb()}</span>
-          <span className="tb-badge">{(user?.plan || "STARTER").toUpperCase()}</span>
+          <button className="btn-outline" onClick={onLogin} style={{ padding: "10px 24px" }}>Entrar</button>
+          <button className="btn-gold" onClick={onRegister} style={{ padding: "10px 24px" }}>Começar Grátis</button>
         </div>
-        <div className="mn-content">
+      </nav>
 
-          {page === "dashboard" && (
-            <div className="fade-in">
-              <h1 className="dash-title">Olá, {user?.name?.split(" ")[0]}. <em>O que vamos criar?</em></h1>
-              <p className="dash-sub">Escolha um módulo para começar</p>
-              <div className="m-grid">
-                {MODULES.map((m, i) => (
-                  <div key={m.id} className="m-card" style={{ borderTopColor: m.accent, animationDelay: `${i * 60}ms` }} onClick={() => goModule(m)}>
-                    <div className="m-card-icon" style={{ color: m.accent }}>{m.icon}</div>
-                    <h3 className="m-card-title">{m.title}</h3>
-                    <p className="m-card-desc">{m.desc}</p>
-                    <div className="m-card-foot" style={{ color: m.accent }}>{m.tools.length} ferramentas →</div>
-                  </div>
-                ))}
+      {/* HERO */}
+      <section style={{
+        minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "120px 40px 80px",
+        position: "relative", overflow: "hidden",
+      }}>
+        {/* Background ornaments */}
+        <div style={{
+          position: "absolute", top: "20%", right: "10%",
+          width: 400, height: 400,
+          background: `radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%)`,
+          pointerEvents: "none",
+        }} />
+        <div style={{
+          position: "absolute", bottom: "10%", left: "5%",
+          width: 300, height: 300,
+          background: `radial-gradient(circle, rgba(107,181,255,0.06) 0%, transparent 70%)`,
+          pointerEvents: "none",
+        }} />
+        {/* Grid pattern */}
+        <div style={{
+          position: "absolute", inset: 0, opacity: 0.03,
+          backgroundImage: `linear-gradient(${COLORS.gold} 1px, transparent 1px), linear-gradient(90deg, ${COLORS.gold} 1px, transparent 1px)`,
+          backgroundSize: "60px 60px",
+          pointerEvents: "none",
+        }} />
+
+        <div style={{ maxWidth: 900, textAlign: "center", position: "relative" }}>
+          <div className="tag">Workspace Inteligente para Empresas</div>
+          <h1 style={{
+            fontFamily: "Cormorant Garamond, serif",
+            fontSize: "clamp(48px, 7vw, 88px)",
+            fontWeight: 300, lineHeight: 1.1,
+            marginBottom: 28,
+            animation: "fadeUp 0.8s ease forwards",
+          }}>
+            Automatize o trabalho<br />que consome <em style={{ color: COLORS.gold, fontStyle: "italic" }}>horas</em>
+          </h1>
+          <p style={{
+            color: COLORS.gray, fontSize: 18, lineHeight: 1.8,
+            maxWidth: 600, margin: "0 auto 48px",
+            animation: "fadeUp 0.8s 0.2s ease both",
+          }}>
+            Documentos, dados, produtividade e conteúdo — tudo com inteligência artificial de última geração, numa única plataforma.
+          </p>
+          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", animation: "fadeUp 0.8s 0.4s ease both" }}>
+            <button className="btn-gold" onClick={onRegister} style={{ fontSize: 15 }}>Criar Conta Grátis</button>
+            <button className="btn-outline" onClick={onLogin} style={{ fontSize: 15 }}>Ver Demonstração</button>
+          </div>
+          <p style={{ marginTop: 20, color: COLORS.gray, fontSize: 13 }}>
+            Sem cartão de crédito · 5 gerações grátis · Cancele quando quiser
+          </p>
+
+          {/* Stats */}
+          <div style={{
+            display: "flex", gap: 48, justifyContent: "center", marginTop: 72,
+            padding: "40px 0", borderTop: `1px solid rgba(201,168,76,0.15)`,
+            animation: "fadeIn 1s 0.6s ease both",
+          }}>
+            {[["16", "Ferramentas"], ["4", "Módulos"], ["500+", "Empresas"], ["98%", "Satisfação"]].map(([num, label]) => (
+              <div key={label} style={{ textAlign: "center" }}>
+                <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 42, fontWeight: 300, color: COLORS.gold }}>{num}</div>
+                <div style={{ color: COLORS.gray, fontSize: 13, letterSpacing: 1 }}>{label}</div>
               </div>
-              <div className="stats-row">
-                {[{ n: usage.current, l: "Gerações" }, { n: usage.remaining >= 999999 ? "∞" : usage.remaining, l: "Restantes" }, { n: "16", l: "Ferramentas" }, { n: history.length, l: "No histórico" }].map((s, i) => (
-                  <div key={i} className="stat-box"><div className="stat-n">{s.n}</div><div className="stat-l">{s.l}</div></div>
-                ))}
-              </div>
-              {history.length > 0 && <div style={{ marginTop: 32 }}>
-                <h3 className="sec-title">Atividade recente</h3>
-                {history.slice(0, 5).map((h, i) => <div key={i} className="h-row"><span className="h-date">{h.date}</span><span className="h-badge">{h.module}</span><span className="h-tool">{h.tool}</span><span className="h-prev">{h.preview}</span></div>)}
-              </div>}
-            </div>
-          )}
-
-          {page === "module" && activeModule && (
-            <div className="fade-in">
-              <button className="back" onClick={goBack}>← Voltar</button>
-              <div className="mod-head"><span className="mod-icon" style={{ color: activeModule.accent }}>{activeModule.icon}</span><div><h2 className="mod-title">{activeModule.title}</h2><p className="mod-desc">{activeModule.desc}</p></div></div>
-              <div className="t-grid">{activeModule.tools.map((t, i) => (
-                <div key={t.id} className="t-card" style={{ animationDelay: `${i * 50}ms` }} onClick={() => goTool(t)}>
-                  <div className="t-card-icon">{t.icon}</div><div className="t-card-name">{t.name}</div>
-                </div>
-              ))}</div>
-            </div>
-          )}
-
-          {page === "tool" && activeTool && activeModule && (
-            <div className="fade-in">
-              <button className="back" onClick={goBack}>← {activeModule.label}</button>
-              <div className="tool-head"><span style={{ fontSize: 32 }}>{activeTool.icon}</span><h2 className="tool-title">{activeTool.name}</h2></div>
-              <div className="tool-box">
-                <textarea className="tool-ta" value={input} onChange={e => setInput(e.target.value)} placeholder={activeTool.ph} onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) generate(); }} />
-                <div className="tool-footer">
-                  <span className="tool-chars">{input.length} caracteres</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <span className="tool-shortcut">Ctrl+Enter</span>
-                    <button className="tool-btn" onClick={generate} disabled={loading || !input.trim()} style={{ background: loading || !input.trim() ? undefined : activeModule.accent }}>
-                      {loading ? <span className="dots"><span /><span /><span /></span> : "Gerar com IA"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-              {output && (
-                <div ref={resRef} className="tool-out fade-in">
-                  <div className="tool-out-head"><div className="tool-dot" /><span className="tool-out-lbl">Resultado</span></div>
-                  <div className="tool-out-text"><StreamText text={output} /></div>
-                  <div className="tool-out-actions">
-                    <button className="tool-act" onClick={() => { navigator.clipboard?.writeText(output); showToast("Copiado!"); }}>📋 Copiar</button>
-                    <button className="tool-act" onClick={() => { setInput(""); setOutput(""); }}>🔄 Novo</button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {page === "history" && (
-            <div className="fade-in">
-              <h2 className="pg-title">Histórico de Gerações</h2>
-              {history.length === 0 ? <p className="empty">Nenhuma geração ainda.</p> : (
-                <div className="h-table">{history.map((h, i) => <div key={i} className="h-row"><span className="h-date">{h.date}</span><span className="h-badge">{h.module}</span><span className="h-tool">{h.tool}</span><span className="h-prev">{h.preview}</span></div>)}</div>
-              )}
-            </div>
-          )}
-
-          {page === "plans" && (
-            <div className="fade-in">
-              <div style={{ textAlign: "center", marginBottom: 36 }}>
-                <h2 className="pg-title">Planos</h2>
-                <p className="pg-sub">Escale conforme sua empresa cresce</p>
-              </div>
-              <div className="pl-grid">
-                {PLANS.map((p, i) => (
-                  <div key={p.id} className={`pl-card ${p.hl ? "pl-hl" : ""}`} style={{ animationDelay: `${i * 80}ms` }}>
-                    {p.hl && <div className="pl-badge">RECOMENDADO</div>}
-                    <h3 className="pl-name">{p.name}</h3>
-                    <div className="pl-price">{p.price}<span className="pl-period">{p.sub}</span></div>
-                    <div className="pl-meta">{p.users} · {p.gens}</div>
-                    <div className="pl-feats">{p.features.map(f => <div key={f} className="pl-feat">✓ {f}</div>)}</div>
-                    <button className={`pl-cta ${p.hl ? "pl-cta-p" : ""}`}>{p.id === "enterprise" ? "Falar com Vendas" : user?.plan === p.id ? "Plano atual" : "Escolher"}</button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
+            ))}
+          </div>
         </div>
-      </main>
+      </section>
+
+      {/* MÓDULOS */}
+      <section id="módulos" style={{ padding: "100px 40px", background: COLORS.navyLight }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div className="tag">Módulos</div>
+          <h2 className="section-title">Tudo que sua empresa precisa,<br /><em className="gold">numa só plataforma</em></h2>
+          <div className="gold-line" />
+          <p className="section-subtitle" style={{ marginBottom: 60 }}>
+            16 ferramentas de IA organizadas em 4 módulos estratégicos para acelerar cada área do seu negócio.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
+            {MODULES.map(mod => (
+              <div key={mod.id} className="card" onClick={onRegister} style={{ cursor: "pointer" }}>
+                <div style={{ fontSize: 32, marginBottom: 16, color: mod.color }}>{mod.icon}</div>
+                <h3 style={{ fontSize: 20, fontFamily: "Cormorant Garamond, serif", fontWeight: 400, marginBottom: 8 }}>{mod.label}</h3>
+                <div style={{ width: 32, height: 1, background: mod.color, marginBottom: 16 }} />
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {mod.tools.map(t => (
+                    <div key={t.id} style={{ color: COLORS.gray, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ color: mod.color, fontSize: 10 }}>▸</span>
+                      {t.name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* DEPOIMENTOS */}
+      <section style={{ padding: "100px 40px" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div className="tag">Depoimentos</div>
+          <h2 className="section-title">O que nossos clientes<br /><em className="gold">estão dizendo</em></h2>
+          <div className="gold-line" style={{ marginBottom: 60 }} />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 24 }}>
+            {TESTIMONIALS.map((t, i) => (
+              <div key={i} className="card">
+                <div style={{ fontSize: 40, color: COLORS.gold, fontFamily: "serif", lineHeight: 1, marginBottom: 16 }}>"</div>
+                <p style={{ color: COLORS.grayLight, fontSize: 15, lineHeight: 1.8, marginBottom: 24 }}>{t.text}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{
+                    width: 44, height: 44, borderRadius: "50%",
+                    background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldDark})`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: COLORS.navy, fontWeight: 700, fontSize: 16,
+                  }}>{t.avatar}</div>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 500 }}>{t.name}</div>
+                    <div style={{ fontSize: 12, color: COLORS.gray }}>{t.role}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* COMPARATIVO */}
+      <section style={{ padding: "100px 40px", background: COLORS.navyLight }}>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <div className="tag">Comparativo</div>
+          <h2 className="section-title">Por que escolher<br /><em className="gold">o Arcane?</em></h2>
+          <div className="gold-line" style={{ marginBottom: 48 }} />
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  <th style={{ padding: "16px 20px", textAlign: "left", color: COLORS.gray, fontSize: 13, fontWeight: 400, letterSpacing: 1, borderBottom: `1px solid rgba(201,168,76,0.15)` }}>RECURSO</th>
+                  {["Arcane", "ChatGPT", "Concorrentes"].map(h => (
+                    <th key={h} style={{
+                      padding: "16px 20px", textAlign: "center",
+                      color: h === "Arcane" ? COLORS.gold : COLORS.gray,
+                      fontSize: 13, fontWeight: h === "Arcane" ? 600 : 400,
+                      letterSpacing: 1,
+                      borderBottom: `1px solid rgba(201,168,76,0.15)`,
+                      background: h === "Arcane" ? "rgba(201,168,76,0.05)" : "transparent",
+                    }}>{h.toUpperCase()}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARISON.map((row, i) => (
+                  <tr key={i} style={{ borderBottom: `1px solid rgba(255,255,255,0.04)` }}>
+                    <td style={{ padding: "14px 20px", color: COLORS.grayLight, fontSize: 14 }}>{row.feature}</td>
+                    {[row.arcane, row.chatgpt, row.concorrente].map((val, j) => (
+                      <td key={j} style={{
+                        padding: "14px 20px", textAlign: "center",
+                        color: j === 0 ? COLORS.gold : val === "✗" ? "#ff6b6b" : COLORS.gray,
+                        fontSize: 14, fontWeight: j === 0 ? 500 : 400,
+                        background: j === 0 ? "rgba(201,168,76,0.03)" : "transparent",
+                      }}>{val}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* PLANOS */}
+      <section id="planos" style={{ padding: "100px 40px" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div className="tag">Planos</div>
+          <h2 className="section-title">Escolha o plano<br /><em className="gold">ideal para você</em></h2>
+          <div className="gold-line" style={{ marginBottom: 60 }} />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 24 }}>
+            {PLANS.map(plan => (
+              <div key={plan.id} style={{
+                background: plan.highlight ? "rgba(201,168,76,0.08)" : "rgba(255,255,255,0.03)",
+                border: `1px solid ${plan.highlight ? COLORS.gold : "rgba(201,168,76,0.15)"}`,
+                borderRadius: 8, padding: 32,
+                position: "relative",
+                transform: plan.highlight ? "scale(1.02)" : "scale(1)",
+              }}>
+                {plan.highlight && (
+                  <div style={{
+                    position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)",
+                    background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldDark})`,
+                    color: COLORS.navy, fontSize: 11, fontWeight: 700,
+                    padding: "4px 16px", borderRadius: 20, letterSpacing: 1,
+                    whiteSpace: "nowrap",
+                  }}>RECOMENDADO</div>
+                )}
+                <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>{plan.name}</div>
+                <div style={{ marginBottom: 4 }}>
+                  <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 44, fontWeight: 300, color: plan.highlight ? COLORS.gold : COLORS.white }}>{plan.price}</span>
+                  <span style={{ color: COLORS.gray, fontSize: 14 }}>{plan.period}</span>
+                </div>
+                <div style={{ color: COLORS.gray, fontSize: 13, marginBottom: 24 }}>{plan.gens} · {plan.users}</div>
+                <div style={{ height: 1, background: "rgba(201,168,76,0.15)", marginBottom: 24 }} />
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 32 }}>
+                  {plan.features.map((f, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: COLORS.grayLight }}>
+                      <span style={{ color: COLORS.gold, fontSize: 10 }}>✓</span> {f}
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={plan.id === "free" ? onRegister : onRegister}
+                  style={{
+                    width: "100%", padding: "14px",
+                    background: plan.highlight ? `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldDark})` : "transparent",
+                    color: plan.highlight ? COLORS.navy : COLORS.gold,
+                    border: plan.highlight ? "none" : `1px solid ${COLORS.gold}`,
+                    borderRadius: 4, fontWeight: plan.highlight ? 700 : 500,
+                    fontSize: 14, letterSpacing: 1, textTransform: "uppercase",
+                    cursor: "pointer", transition: "all 0.3s",
+                  }}
+                  onMouseEnter={e => { if (!plan.highlight) e.target.style.background = "rgba(201,168,76,0.1)"; }}
+                  onMouseLeave={e => { if (!plan.highlight) e.target.style.background = "transparent"; }}
+                >
+                  {plan.id === "free" ? "Começar Grátis" : "Escolher Plano"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" style={{ padding: "100px 40px", background: COLORS.navyLight }}>
+        <div style={{ maxWidth: 760, margin: "0 auto" }}>
+          <div className="tag">FAQ</div>
+          <h2 className="section-title">Perguntas<br /><em className="gold">frequentes</em></h2>
+          <div className="gold-line" style={{ marginBottom: 48 }} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {FAQS.map((faq, i) => (
+              <div key={i} style={{
+                border: `1px solid rgba(201,168,76,${openFaq === i ? "0.3" : "0.12"})`,
+                borderRadius: 6, overflow: "hidden",
+                background: openFaq === i ? "rgba(201,168,76,0.05)" : "transparent",
+                transition: "all 0.3s",
+              }}>
+                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{
+                  width: "100%", padding: "20px 24px",
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  background: "transparent", color: COLORS.white,
+                  fontSize: 15, textAlign: "left", fontWeight: 400,
+                }}>
+                  {faq.q}
+                  <span style={{ color: COLORS.gold, fontSize: 20, lineHeight: 1, flexShrink: 0, marginLeft: 16 }}>{openFaq === i ? "−" : "+"}</span>
+                </button>
+                {openFaq === i && (
+                  <div style={{ padding: "0 24px 20px", color: COLORS.gray, fontSize: 14, lineHeight: 1.8 }}>
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA FINAL */}
+      <section style={{ padding: "100px 40px", textAlign: "center" }}>
+        <div style={{ maxWidth: 700, margin: "0 auto" }}>
+          <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "clamp(36px, 5vw, 64px)", fontWeight: 300, lineHeight: 1.2, marginBottom: 24 }}>
+            Pronto para transformar<br />sua <em style={{ color: COLORS.gold }}>produtividade?</em>
+          </div>
+          <p style={{ color: COLORS.gray, fontSize: 16, marginBottom: 40 }}>
+            Junte-se a centenas de empresas que já usam o Arcane para trabalhar de forma mais inteligente.
+          </p>
+          <button className="btn-gold" onClick={onRegister} style={{ fontSize: 16, padding: "18px 48px" }}>
+            Criar Conta Grátis Agora
+          </button>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer style={{
+        borderTop: `1px solid rgba(201,168,76,0.15)`,
+        padding: "40px",
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+        flexWrap: "wrap", gap: 20,
+      }}>
+        <Logo size={18} />
+        <div style={{ color: COLORS.gray, fontSize: 13 }}>
+          © 2026 Arcane. Todos os direitos reservados.
+        </div>
+        <div style={{ display: "flex", gap: 24 }}>
+          {["Privacidade", "Termos", "Contato"].map(item => (
+            <span key={item} style={{ color: COLORS.gray, fontSize: 13, cursor: "pointer" }}
+              onMouseEnter={e => e.target.style.color = COLORS.gold}
+              onMouseLeave={e => e.target.style.color = COLORS.gray}>
+              {item}
+            </span>
+          ))}
+        </div>
+      </footer>
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════
-// CSS
+// AUTH
 // ═══════════════════════════════════════════════
-const CSS = `
-:root{--bg:#F7F6F3;--sf:#FFF;--bd:#E5E2DC;--bl:#EDEAE5;--tx:#1B1B18;--ts:#65635D;--td:#9C9A94;--ac:#1B1B18;--as:#F2F0EC;--hv:#F9F8F5;--ok:#16A34A;--er:#DC2626;--f:'Libre Franklin',sans-serif;--fd:'Playfair Display',serif;--r:12px;--rs:8px;--sh:0 1px 3px rgba(0,0,0,.04),0 1px 2px rgba(0,0,0,.06);--sl:0 4px 24px rgba(0,0,0,.06)}
-*{box-sizing:border-box;margin:0;padding:0}body{font-family:var(--f);background:var(--bg);color:var(--tx)}
-::selection{background:var(--ac);color:#fff}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
-textarea:focus,input:focus,button:focus{outline:none}
-@keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-@keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-@keyframes dotP{0%,80%,100%{opacity:.2}40%{opacity:1}}
-@keyframes toastIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
-.fade-in{animation:fadeIn .45s ease both}
-.dots{display:inline-flex;gap:4px;align-items:center}.dots span{width:5px;height:5px;border-radius:50%;background:currentColor;animation:dotP 1.2s infinite}.dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
-.toast{position:fixed;top:20px;right:20px;z-index:9999;padding:12px 20px;border-radius:var(--rs);font-size:13px;font-weight:500;animation:toastIn .3s ease;box-shadow:var(--sl);background:var(--ok);color:#fff}
-.toast-err{background:var(--er)}
-.landing-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(247,246,243,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--bl)}
-.landing-nav-inner{max-width:1100px;margin:0 auto;padding:16px 32px;display:flex;align-items:center;justify-content:space-between}
-.nav-logo{display:flex;align-items:center;gap:10px}
-.nav-logo-mark{width:34px;height:34px;border-radius:9px;background:var(--ac);color:#F7F6F3;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:600;font-size:16px}
-.nav-logo-text{font-family:var(--fd);font-size:20px;font-weight:500}
-.nav-links{display:flex;align-items:center;gap:24px}
-.nav-link{font-size:14px;color:var(--ts);cursor:pointer;transition:color .2s}.nav-link:hover{color:var(--tx)}
-.nav-cta{padding:8px 20px;border:1px solid var(--ac);border-radius:var(--rs);background:transparent;font-family:var(--f);font-size:13px;font-weight:500;cursor:pointer;color:var(--tx);transition:all .2s}
-.nav-cta:hover{background:var(--ac);color:#fff}
-.hero{padding:140px 32px 80px;text-align:center}
-.hero-inner{max-width:680px;margin:0 auto}
-.hero-tag{font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--td);margin-bottom:20px}
-.hero-title{font-family:var(--fd);font-size:clamp(36px,5.5vw,58px);line-height:1.1;font-weight:400;letter-spacing:-.03em;margin-bottom:22px}
-.hero-title em{font-style:italic;color:var(--ts)}
-.hero-sub{font-size:17px;color:var(--ts);line-height:1.65;margin-bottom:36px;font-weight:300}
-.hero-actions{display:flex;gap:12px;justify-content:center;margin-bottom:20px}
-.hero-btn-primary{padding:14px 32px;border:none;border-radius:var(--rs);background:var(--ac);color:#fff;font-family:var(--f);font-size:15px;font-weight:600;cursor:pointer;transition:opacity .2s}.hero-btn-primary:hover{opacity:.9}
-.hero-btn-secondary{padding:14px 32px;border:1px solid var(--bd);border-radius:var(--rs);background:transparent;font-family:var(--f);font-size:15px;font-weight:500;cursor:pointer;color:var(--tx);transition:all .2s}.hero-btn-secondary:hover{border-color:var(--ac)}
-.hero-note{font-size:12px;color:var(--td)}
-.features-section{padding:80px 32px;background:var(--sf);border-top:1px solid var(--bl);border-bottom:1px solid var(--bl)}
-.features-inner{max-width:1000px;margin:0 auto}
-.section-tag{font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--td);text-align:center;margin-bottom:12px}
-.section-headline{font-family:var(--fd);font-size:32px;font-weight:400;text-align:center;margin-bottom:48px;letter-spacing:-.02em;line-height:1.2}
-.section-headline em{font-style:italic;color:var(--ts)}
-.features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-.feature-card{background:var(--bg);border:1px solid var(--bd);border-top:3px solid;border-radius:var(--r);padding:28px 24px;animation:fadeIn .5s ease both}
-.feature-icon{font-size:22px;font-weight:700;margin-bottom:14px}
-.feature-title{font-family:var(--fd);font-size:19px;font-weight:500;margin-bottom:6px}
-.feature-desc{font-size:13px;color:var(--ts);line-height:1.5;margin-bottom:16px}
-.feature-tools{display:flex;flex-wrap:wrap;gap:6px}
-.feature-tool-tag{font-size:11px;background:var(--sf);border:1px solid var(--bl);padding:4px 10px;border-radius:5px;color:var(--ts)}
-.pricing-section{padding:80px 32px}
-.pricing-inner{max-width:800px;margin:0 auto}
-.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
-.price-card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:30px 24px;animation:fadeIn .4s ease both;position:relative}
-.price-hl{border-color:var(--ac);box-shadow:var(--sl)}
-.price-badge{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--ac);color:#fff;font-size:10px;font-weight:600;padding:3px 12px;border-radius:0 0 6px 6px;letter-spacing:.06em}
-.price-name{font-size:16px;font-weight:600;margin-bottom:4px}
-.price-amount{font-family:var(--fd);font-size:34px;font-weight:500;margin-bottom:4px}
-.price-period{font-size:14px;color:var(--td);font-weight:400;font-family:var(--f)}
-.price-meta{font-size:12px;color:var(--ts);margin-bottom:22px}
-.price-features{display:flex;flex-direction:column;gap:9px;margin-bottom:26px}
-.price-feature{font-size:13px;color:var(--ts)}
-.price-cta{width:100%;padding:11px;border:1px solid var(--bd);border-radius:var(--rs);background:transparent;font-family:var(--f);font-size:13px;font-weight:500;cursor:pointer;color:var(--tx);transition:all .2s}
-.price-cta:hover{border-color:var(--ac)}.price-cta-primary{background:var(--ac);color:#fff;border:none}.price-cta-primary:hover{opacity:.9}
-.landing-footer{padding:32px;border-top:1px solid var(--bl);text-align:center}
-.footer-inner{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
-.footer-text{font-size:12px;color:var(--td)}
-.auth-wrap{display:flex;min-height:100vh}
-.auth-left{flex:1;background:var(--ac);color:#F7F6F3;display:flex;align-items:center;justify-content:center;padding:48px;position:relative;overflow:hidden}
-.auth-left::before{content:'';position:absolute;top:-30%;right:-20%;width:500px;height:500px;border-radius:50%;background:rgba(255,255,255,.03)}
-.auth-left-content{position:relative;z-index:1;max-width:440px}
-.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:48px}
-.auth-headline{font-family:var(--fd);font-size:36px;line-height:1.15;font-weight:400;margin-bottom:20px;letter-spacing:-.02em}
-.auth-headline em{font-style:italic;opacity:.7}
-.auth-sub{font-size:15px;line-height:1.6;opacity:.6;margin-bottom:40px;font-weight:300}
-.auth-features{display:flex;flex-direction:column;gap:14px}
-.auth-feat{display:flex;align-items:center;gap:12px;font-size:14px}.auth-feat strong{display:block}
-.auth-feat-sub{font-size:12px;opacity:.5}
-.auth-right{flex:1;display:flex;align-items:center;justify-content:center;padding:48px;background:var(--bg)}
-.auth-form-box{width:100%;max-width:380px}
-.auth-form-title{font-family:var(--fd);font-size:28px;font-weight:500;margin-bottom:6px;letter-spacing:-.02em}
-.auth-form-sub{font-size:14px;color:var(--ts);margin-bottom:28px}
-.auth-error{background:#FEF2F2;border:1px solid #FECACA;color:var(--er);padding:10px 14px;border-radius:var(--rs);font-size:13px;margin-bottom:18px}
-.auth-fields{display:flex;flex-direction:column;gap:6px;margin-bottom:24px}
-.fl{font-size:12px;font-weight:500;color:var(--ts);margin-top:10px;margin-bottom:2px}
-.fi{width:100%;padding:11px 14px;border:1px solid var(--bd);border-radius:var(--rs);font-family:var(--f);font-size:14px;color:var(--tx);background:var(--sf);transition:border-color .2s}
-.fi:focus{border-color:var(--ac)}.fi::placeholder{color:var(--td)}
-.auth-btn{width:100%;padding:13px;border:none;border-radius:var(--rs);background:var(--ac);color:#fff;font-family:var(--f);font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s}
-.auth-btn:hover{opacity:.9}.auth-btn:disabled{opacity:.5;cursor:not-allowed}
-.auth-switch{text-align:center;margin-top:20px;font-size:13px;color:var(--ts)}
-.auth-switch-link{color:var(--ac);font-weight:600;cursor:pointer;text-decoration:underline}
-.app-wrap{display:flex;min-height:100vh;background:var(--bg)}
-.sb{background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;transition:width .25s ease;overflow:hidden;flex-shrink:0}
-.sb-open{width:256px}.sb-closed{width:56px}
-.sb-head{display:flex;align-items:center;gap:10px;padding:20px 16px;border-bottom:1px solid var(--bl)}
-.sb-logo{width:28px;height:28px;border-radius:7px;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:600;font-size:14px;flex-shrink:0}
-.sb-logo-text{font-family:var(--fd);font-size:18px;font-weight:500}
-.sb-label{font-size:10px;font-weight:600;color:var(--td);letter-spacing:.1em;text-transform:uppercase;padding:20px 18px 8px}
-.sb-item{display:flex;align-items:center;gap:10px;padding:9px 16px;margin:1px 8px;border-radius:7px;cursor:pointer;font-size:13.5px;color:var(--ts);transition:all .15s}
-.sb-item:hover{background:var(--hv);color:var(--tx)}.sb-active{background:var(--as)!important;color:var(--tx)!important;font-weight:500}
-.sb-icon{font-size:14px;font-weight:700;width:20px;text-align:center;flex-shrink:0}
-.sb-usage{margin:auto 14px 0;padding:16px;background:var(--as);border-radius:var(--rs)}
-.sb-usage-lbl{font-size:11px;color:var(--td);margin-bottom:6px}
-.sb-usage-num{font-family:var(--fd);font-size:26px;font-weight:500}.sb-usage-max{font-size:14px;color:var(--td);font-weight:400}
-.sb-bar{margin-top:8px;height:4px;background:var(--bd);border-radius:2px;overflow:hidden}
-.sb-fill{height:100%;background:var(--ac);border-radius:2px;transition:width .5s ease}
-.sb-user{display:flex;align-items:center;gap:10px;padding:16px;border-top:1px solid var(--bl);margin-top:12px}
-.sb-avatar{width:32px;height:32px;border-radius:8px;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex-shrink:0}
-.sb-user-info{flex:1;min-width:0}.sb-user-name{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sb-user-plan{font-size:10px;color:var(--td);font-weight:600;letter-spacing:.05em}
-.sb-logout{background:none;border:none;color:var(--td);cursor:pointer;font-size:16px;padding:4px;transition:color .2s}.sb-logout:hover{color:var(--er)}
-.mn{flex:1;display:flex;flex-direction:column;min-height:100vh;overflow-x:hidden}
-.topbar{display:flex;align-items:center;gap:12px;padding:14px 24px;border-bottom:1px solid var(--bl);background:var(--sf)}
-.tb-toggle{background:none;border:none;font-size:16px;color:var(--ts);cursor:pointer;padding:2px 6px}
-.tb-bc{font-size:12px;color:var(--td)}.tb-badge{margin-left:auto;font-size:10px;font-weight:600;letter-spacing:.06em;color:var(--td);background:var(--as);padding:4px 10px;border-radius:5px}
-.mn-content{flex:1;padding:32px 36px 64px;max-width:880px}
-.dash-title{font-family:var(--fd);font-size:30px;font-weight:400;letter-spacing:-.02em;line-height:1.2;margin-bottom:8px}.dash-title em{font-style:italic;color:var(--ts)}
-.dash-sub{color:var(--td);font-size:14px;margin-bottom:32px}
-.m-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:32px}
-.m-card{background:var(--sf);border:1px solid var(--bd);border-top:3px solid;border-radius:var(--r);padding:26px 22px;cursor:pointer;transition:all .25s ease;animation:fadeIn .4s ease both;box-shadow:var(--sh)}
-.m-card:hover{transform:translateY(-3px);box-shadow:var(--sl)}
-.m-card-icon{font-size:24px;font-weight:700;margin-bottom:14px}.m-card-title{font-family:var(--fd);font-size:18px;font-weight:500;margin-bottom:6px}
-.m-card-desc{font-size:13px;color:var(--ts);line-height:1.5}.m-card-foot{margin-top:16px;font-size:12px;font-weight:500}
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px}
-.stat-box{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rs);padding:20px;text-align:center}
-.stat-n{font-family:var(--fd);font-size:32px;font-weight:500}.stat-l{font-size:12px;color:var(--td);margin-top:4px}
-.sec-title{font-family:var(--fd);font-size:20px;font-weight:500;margin-bottom:16px}
-.back{background:none;border:none;font-family:var(--f);font-size:13px;color:var(--ts);cursor:pointer;margin-bottom:28px;padding:0}.back:hover{color:var(--tx)}
-.mod-head{display:flex;align-items:center;gap:14px;margin-bottom:28px}.mod-icon{font-size:30px;font-weight:700}
-.mod-title{font-family:var(--fd);font-size:24px;font-weight:500}.mod-desc{font-size:13px;color:var(--ts);margin-top:2px}
-.t-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.t-card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:22px 20px;cursor:pointer;transition:all .2s;animation:fadeIn .35s ease both}
-.t-card:hover{border-color:var(--ac);background:var(--hv);transform:translateY(-2px);box-shadow:var(--sh)}
-.t-card-icon{font-size:26px;margin-bottom:10px}.t-card-name{font-size:14px;font-weight:500}
-.tool-head{display:flex;align-items:center;gap:12px;margin-bottom:24px}.tool-title{font-family:var(--fd);font-size:22px;font-weight:500}
-.tool-box{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
-.tool-ta{width:100%;min-height:170px;padding:22px;border:none;background:transparent;font-family:var(--f);font-size:14px;color:var(--tx);line-height:1.7;resize:vertical}.tool-ta::placeholder{color:var(--td)}
-.tool-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 22px;border-top:1px solid var(--bl)}
-.tool-chars{font-size:12px;color:var(--td)}.tool-shortcut{font-size:11px;color:var(--td);background:var(--as);padding:3px 8px;border-radius:4px}
-.tool-btn{padding:9px 22px;border:none;border-radius:var(--rs);background:var(--bd);color:var(--td);font-family:var(--f);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
-.tool-btn:not(:disabled){color:#fff}.tool-btn:disabled{cursor:not-allowed}
-.tool-out{margin-top:20px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:26px;box-shadow:var(--sh)}
-.tool-out-head{display:flex;align-items:center;gap:8px;margin-bottom:18px}.tool-dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}
-.tool-out-lbl{font-size:12px;font-weight:500;color:var(--ok)}.tool-out-text{font-size:14px;line-height:1.85;white-space:pre-wrap}
-.tool-out-actions{display:flex;gap:10px;margin-top:22px;padding-top:14px;border-top:1px solid var(--bl)}
-.tool-act{padding:7px 16px;border:1px solid var(--bd);border-radius:7px;background:transparent;color:var(--ts);font-family:var(--f);font-size:12px;cursor:pointer;transition:all .2s}
-.tool-act:hover{border-color:var(--ac);color:var(--tx)}
-.pg-title{font-family:var(--fd);font-size:26px;font-weight:500;margin-bottom:8px}.pg-sub{font-size:14px;color:var(--ts)}
-.empty{color:var(--td);font-size:14px;padding:40px 0}
-.h-table{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
-.h-row{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--bl);font-size:13px;animation:slideIn .3s ease both}.h-row:last-child{border-bottom:none}
-.h-date{color:var(--td);min-width:110px;font-size:12px}
-.h-badge{background:var(--as);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;color:var(--ts);text-transform:capitalize}
-.h-tool{font-weight:500;min-width:100px}.h-prev{color:var(--ts);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
-.pl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;max-width:780px;margin:0 auto}
-.pl-card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:30px 24px;animation:fadeIn .4s ease both;position:relative}
-.pl-hl{border-color:var(--ac);box-shadow:var(--sl)}
-.pl-badge{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--ac);color:#fff;font-size:10px;font-weight:600;padding:3px 12px;border-radius:0 0 6px 6px;letter-spacing:.06em}
-.pl-name{font-size:16px;font-weight:600;margin-bottom:4px}
-.pl-price{font-family:var(--fd);font-size:34px;font-weight:500;margin-bottom:4px}.pl-period{font-size:14px;color:var(--td);font-weight:400;font-family:var(--f)}
-.pl-meta{font-size:12px;color:var(--ts);margin-bottom:22px}
-.pl-feats{display:flex;flex-direction:column;gap:9px;margin-bottom:26px}.pl-feat{font-size:13px;color:var(--ts)}
-.pl-cta{width:100%;padding:11px;border:1px solid var(--bd);border-radius:var(--rs);background:transparent;font-family:var(--f);font-size:13px;font-weight:500;cursor:pointer;color:var(--tx);transition:all .2s}
-.pl-cta:hover{border-color:var(--ac)}.pl-cta-p{background:var(--ac);color:#fff;border:none}.pl-cta-p:hover{opacity:.9}
-@media(max-width:768px){
-  .auth-wrap{flex-direction:column}.auth-left{display:none}
-  .sb-open{width:220px;position:fixed;z-index:100;height:100vh;box-shadow:var(--sl)}
-  .m-grid,.t-grid,.features-grid{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}
-  .pl-grid,.pricing-grid{grid-template-columns:1fr}.mn-content{padding:24px 18px}
-  .h-row{flex-wrap:wrap;gap:6px}.h-prev{width:100%}
-  .hero-title{font-size:32px}.hero-actions{flex-direction:column;align-items:center}
-  .footer-inner{flex-direction:column;gap:12px}
-  .landing-nav-inner{padding:12px 16px}.nav-links{gap:14px}
+
+function AuthPage({ mode, onSuccess, onSwitch }) {
+  const [form, setForm] = useState({ name: "", company: "", email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handle = async () => {
+    setLoading(true); setError("");
+    try {
+      const endpoint = mode === "login" ? "/auth/login" : "/auth/register";
+      const body = mode === "login" ? { email: form.email, password: form.password } : form;
+      const res = await fetch(`${BACKEND_URL}${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || data.message || "Erro");
+      localStorage.setItem("arcane_token", data.access_token);
+      localStorage.setItem("arcane_user", JSON.stringify(data.user));
+      onSuccess(data.user);
+    } catch (e) { setError(e.message); }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{
+      minHeight: "100vh", background: COLORS.navy,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: 24, position: "relative",
+    }}>
+      <div style={{
+        position: "absolute", inset: 0, opacity: 0.03,
+        backgroundImage: `linear-gradient(${COLORS.gold} 1px, transparent 1px), linear-gradient(90deg, ${COLORS.gold} 1px, transparent 1px)`,
+        backgroundSize: "60px 60px",
+      }} />
+      <div style={{
+        background: COLORS.navyLight, border: `1px solid rgba(201,168,76,0.2)`,
+        borderRadius: 12, padding: "48px 40px", width: "100%", maxWidth: 440,
+        position: "relative", animation: "fadeUp 0.5s ease",
+      }}>
+        <div style={{ marginBottom: 32 }}>
+          <Logo size={20} />
+        </div>
+        <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 32, fontWeight: 300, marginBottom: 8 }}>
+          {mode === "login" ? "Bem-vindo de volta" : "Criar sua conta"}
+        </h2>
+        <p style={{ color: COLORS.gray, fontSize: 14, marginBottom: 32 }}>
+          {mode === "login" ? "Entre para continuar no Arcane" : "Comece grátis, sem cartão de crédito"}
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {mode === "register" && (
+            <>
+              <input placeholder="Seu nome" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+              <input placeholder="Nome da empresa" value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} />
+            </>
+          )}
+          <input placeholder="E-mail" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+          <input placeholder="Senha" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })}
+            onKeyDown={e => e.key === "Enter" && handle()} />
+        </div>
+
+        {error && <div style={{ color: "#ff6b6b", fontSize: 13, marginTop: 12, padding: "10px 14px", background: "rgba(255,107,107,0.1)", borderRadius: 6 }}>{error}</div>}
+
+        <button className="btn-gold" onClick={handle} disabled={loading}
+          style={{ width: "100%", marginTop: 24, padding: 16, fontSize: 15, opacity: loading ? 0.7 : 1 }}>
+          {loading ? "Aguarde..." : mode === "login" ? "Entrar" : "Criar Conta Grátis"}
+        </button>
+
+        <div style={{ textAlign: "center", marginTop: 24, fontSize: 14, color: COLORS.gray }}>
+          {mode === "login" ? "Não tem conta?" : "Já tem conta?"}{" "}
+          <span style={{ color: COLORS.gold, cursor: "pointer" }} onClick={onSwitch}>
+            {mode === "login" ? "Criar agora" : "Entrar"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
-`;
+
+// ═══════════════════════════════════════════════
+// DASHBOARD APP
+// ═══════════════════════════════════════════════
+
+async function callAI(toolId, userInput) {
+  const token = localStorage.getItem("arcane_token");
+  const res = await fetch(`${BACKEND_URL}/ai/generate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ tool: toolId, input: userInput }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Erro na geração");
+  return data.output;
+}
+
+function AppDashboard({ user, onLogout }) {
+  const [activeModule, setActiveModule] = useState(null);
+  const [activeTool, setActiveTool] = useState(null);
+  const [view, setView] = useState("dashboard");
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [usage, setUsage] = useState({ current: 0, limit: 500 });
+  const [toast, setToast] = useState(null);
+
+  const showToast = useCallback((msg) => { setToast(msg); }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("arcane_token");
+    if (!token) return;
+    fetch(`${BACKEND_URL}/billing/usage`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json()).then(d => { if (d.current !== undefined) setUsage(d); }).catch(() => {});
+    fetch(`${BACKEND_URL}/ai/history?per_page=20`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json()).then(d => { if (d.history) setHistory(d.history); }).catch(() => {});
+  }, []);
+
+  const generate = async () => {
+    if (!input.trim() || !activeTool) return;
+    setLoading(true); setResult("");
+    try {
+      const text = await callAI(activeTool.id, input);
+      setResult(text);
+      setUsage(u => ({ ...u, current: u.current + 1 }));
+      setHistory(h => [{ tool_name: activeTool.name, input: input.slice(0, 60), output: text, created_at: new Date().toISOString() }, ...h]);
+      showToast("Conteúdo gerado com sucesso!");
+    } catch (e) { setResult(`Erro: ${e.message}`); }
+    setLoading(false);
+  };
+
+  const navItems = [
+    { id: "dashboard", label: "Dashboard", icon: "⊞" },
+    ...MODULES.map(m => ({ id: m.id, label: m.label, icon: m.icon, module: m })),
+    { id: "historico", label: "Histórico", icon: "◷" },
+    { id: "planos", label: "Planos", icon: "◈" },
+  ];
+
+  const usagePct = Math.min((usage.current / (usage.limit || 1)) * 100, 100);
+  const planLabel = user?.plan?.toUpperCase() || "FREE";
+
+  return (
+    <div style={{ display: "flex", minHeight: "100vh" }}>
+      {/* SIDEBAR */}
+      <div className="sidebar">
+        <div className="sidebar-logo">
+          <Logo size={18} />
+        </div>
+
+        <div style={{ flex: 1, overflowY: "auto" }}>
+          <div style={{ padding: "0 20px 8px", fontSize: 10, letterSpacing: 2, color: COLORS.gray, textTransform: "uppercase" }}>Módulos</div>
+          {navItems.filter(n => n.module).map(item => (
+            <div key={item.id} className={`nav-item ${view === item.id ? "active" : ""}`}
+              onClick={() => { setView(item.id); setActiveModule(item.module); setActiveTool(null); setResult(""); }}>
+              <span style={{ color: item.module.color }}>{item.icon}</span>
+              {item.label}
+            </div>
+          ))}
+
+          <div style={{ height: 1, background: "rgba(201,168,76,0.1)", margin: "16px 20px" }} />
+          <div style={{ padding: "0 20px 8px", fontSize: 10, letterSpacing: 2, color: COLORS.gray, textTransform: "uppercase" }}>Geral</div>
+          {[{ id: "dashboard", label: "Dashboard", icon: "⊞" }, { id: "historico", label: "Histórico", icon: "◷" }, { id: "planos", label: "Planos", icon: "◈" }].map(item => (
+            <div key={item.id} className={`nav-item ${view === item.id ? "active" : ""}`}
+              onClick={() => { setView(item.id); setActiveModule(null); setActiveTool(null); }}>
+              <span>{item.icon}</span>
+              {item.label}
+            </div>
+          ))}
+        </div>
+
+        {/* Usage */}
+        <div style={{ padding: "20px 24px", borderTop: `1px solid rgba(201,168,76,0.15)` }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: COLORS.gray, marginBottom: 6 }}>
+            <span>Uso este mês</span>
+            <span style={{ color: COLORS.gold }}>{usage.current}/{usage.limit}</span>
+          </div>
+          <div className="usage-bar">
+            <div className="usage-fill" style={{ width: `${usagePct}%` }} />
+          </div>
+          <div style={{ marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 500 }}>{user?.name || "Usuário"}</div>
+              <div style={{ fontSize: 11, color: COLORS.gold, letterSpacing: 1 }}>{planLabel}</div>
+            </div>
+            <button onClick={onLogout} style={{ background: "none", color: COLORS.gray, fontSize: 18, padding: 4 }}
+              onMouseEnter={e => e.target.style.color = COLORS.gold}
+              onMouseLeave={e => e.target.style.color = COLORS.gray}>↗</button>
+          </div>
+        </div>
+      </div>
+
+      {/* MAIN */}
+      <div className="main-content">
+        <div className="topbar">
+          <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 20, fontWeight: 300 }}>
+            {view === "dashboard" ? "Dashboard" : view === "historico" ? "Histórico" : view === "planos" ? "Planos" : activeModule?.label}
+            {activeTool && <span style={{ color: COLORS.gold }}> / {activeTool.name}</span>}
+          </div>
+          <div style={{
+            background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldDark})`,
+            color: COLORS.navy, fontSize: 11, fontWeight: 700,
+            padding: "4px 12px", borderRadius: 20, letterSpacing: 1,
+          }}>{planLabel}</div>
+        </div>
+
+        <div style={{ padding: 32 }}>
+          {/* DASHBOARD */}
+          {view === "dashboard" && (
+            <div>
+              <div style={{ marginBottom: 40 }}>
+                <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 32, fontWeight: 300, marginBottom: 8 }}>
+                  Olá, <span style={{ color: COLORS.gold }}>{user?.name?.split(" ")[0]}</span>
+                </h2>
+                <p style={{ color: COLORS.gray }}>O que vamos criar hoje?</p>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20 }}>
+                {MODULES.map(mod => (
+                  <div key={mod.id} className="tool-card"
+                    onClick={() => { setView(mod.id); setActiveModule(mod); }}>
+                    <div style={{ fontSize: 36, marginBottom: 16, color: mod.color }}>{mod.icon}</div>
+                    <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 22, marginBottom: 8 }}>{mod.label}</div>
+                    <div style={{ width: 28, height: 1, background: mod.color, marginBottom: 12 }} />
+                    <div style={{ color: COLORS.gray, fontSize: 13 }}>{mod.tools.length} ferramentas disponíveis</div>
+                  </div>
+                ))}
+              </div>
+
+              {history.length > 0 && (
+                <div style={{ marginTop: 48 }}>
+                  <h3 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 22, fontWeight: 300, marginBottom: 20 }}>Gerações recentes</h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {history.slice(0, 4).map((h, i) => (
+                      <div key={i} style={{
+                        background: "rgba(255,255,255,0.02)", border: `1px solid rgba(201,168,76,0.1)`,
+                        borderRadius: 6, padding: "14px 20px",
+                        display: "flex", justifyContent: "space-between", alignItems: "center",
+                      }}>
+                        <div>
+                          <span style={{ color: COLORS.gold, fontSize: 13, fontWeight: 500 }}>{h.tool_name}</span>
+                          <span style={{ color: COLORS.gray, fontSize: 13, marginLeft: 12 }}>{h.input}</span>
+                        </div>
+                        <span style={{ color: COLORS.gray, fontSize: 12 }}>{new Date(h.created_at).toLocaleDateString("pt-BR")}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* MODULE VIEW */}
+          {activeModule && view === activeModule.id && !activeTool && (
+            <div>
+              <p style={{ color: COLORS.gray, marginBottom: 32 }}>Selecione uma ferramenta para começar</p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
+                {activeModule.tools.map(tool => (
+                  <div key={tool.id} className="tool-card"
+                    onClick={() => { setActiveTool(tool); setResult(""); setInput(""); }}>
+                    <div style={{ color: activeModule.color, fontSize: 24, marginBottom: 12 }}>◈</div>
+                    <div style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>{tool.name}</div>
+                    <div style={{ color: COLORS.gray, fontSize: 13 }}>{tool.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TOOL VIEW */}
+          {activeTool && (
+            <div style={{ maxWidth: 800 }}>
+              <button onClick={() => { setActiveTool(null); setResult(""); }}
+                style={{ background: "none", color: COLORS.gray, fontSize: 14, marginBottom: 24, display: "flex", alignItems: "center", gap: 8 }}>
+                ← Voltar
+              </button>
+              <p style={{ color: COLORS.gray, marginBottom: 20 }}>{activeTool.desc}</p>
+              <textarea
+                placeholder={`Descreva o que você precisa para ${activeTool.name.toLowerCase()}...`}
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                rows={5}
+                style={{ resize: "vertical", marginBottom: 16 }}
+              />
+              <button className="btn-gold" onClick={generate} disabled={loading || !input.trim()}
+                style={{ opacity: loading || !input.trim() ? 0.6 : 1 }}>
+                {loading ? "Gerando..." : "Gerar com IA"}
+              </button>
+
+              {(result || loading) && (
+                <div style={{ marginTop: 32 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                    <span style={{ color: COLORS.gold, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: loading ? COLORS.gold : "#4caf50", display: "inline-block", animation: loading ? "pulse 1s infinite" : "none" }} />
+                      {loading ? "Gerando..." : "Resultado"}
+                    </span>
+                    {result && !loading && (
+                      <button className="btn-outline" onClick={() => { navigator.clipboard.writeText(result); showToast("Copiado!"); }}
+                        style={{ padding: "6px 16px", fontSize: 12 }}>Copiar</button>
+                    )}
+                  </div>
+                  <div className="result-box">{loading ? "Aguarde..." : result}</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* HISTORY */}
+          {view === "historico" && (
+            <div>
+              <p style={{ color: COLORS.gray, marginBottom: 32 }}>Todas as suas gerações anteriores</p>
+              {history.length === 0 ? (
+                <div style={{ textAlign: "center", color: COLORS.gray, padding: 60 }}>Nenhuma geração ainda</div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {history.map((h, i) => (
+                    <div key={i} className="card">
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                        <span style={{ color: COLORS.gold, fontSize: 13 }}>{h.tool_name}</span>
+                        <span style={{ color: COLORS.gray, fontSize: 12 }}>{new Date(h.created_at).toLocaleString("pt-BR")}</span>
+                      </div>
+                      <div style={{ color: COLORS.gray, fontSize: 13, marginBottom: 12 }}>{h.input}</div>
+                      <div style={{ color: COLORS.grayLight, fontSize: 13, lineHeight: 1.7 }}>{h.output?.slice(0, 200)}...</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* PLANS */}
+          {view === "planos" && (
+            <div>
+              <p style={{ color: COLORS.gray, marginBottom: 40 }}>Escolha o plano ideal para o seu negócio</p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20 }}>
+                {PLANS.map(plan => (
+                  <div key={plan.id} style={{
+                    background: plan.highlight ? "rgba(201,168,76,0.08)" : "rgba(255,255,255,0.03)",
+                    border: `1px solid ${plan.highlight ? COLORS.gold : "rgba(201,168,76,0.15)"}`,
+                    borderRadius: 8, padding: 28, position: "relative",
+                  }}>
+                    {plan.highlight && (
+                      <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", background: COLORS.gold, color: COLORS.navy, fontSize: 10, fontWeight: 700, padding: "3px 12px", borderRadius: 20, whiteSpace: "nowrap" }}>RECOMENDADO</div>
+                    )}
+                    {user?.plan === plan.id && (
+                      <div style={{ position: "absolute", top: -10, right: 16, background: "#4caf50", color: "#fff", fontSize: 10, fontWeight: 700, padding: "3px 12px", borderRadius: 20 }}>ATUAL</div>
+                    )}
+                    <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 36, fontWeight: 300, color: plan.highlight ? COLORS.gold : COLORS.white }}>{plan.price}<span style={{ fontSize: 14, color: COLORS.gray }}>{plan.period}</span></div>
+                    <div style={{ fontSize: 16, fontWeight: 500, margin: "8px 0 16px" }}>{plan.name}</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 24 }}>
+                      {plan.features.map((f, i) => (
+                        <div key={i} style={{ fontSize: 12, color: COLORS.gray, display: "flex", gap: 8 }}>
+                          <span style={{ color: COLORS.gold }}>✓</span>{f}
+                        </div>
+                      ))}
+                    </div>
+                    <button onClick={() => showToast("Em breve: integração com Stripe!")}
+                      style={{ width: "100%", padding: 12, background: plan.highlight ? `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldDark})` : "transparent", color: plan.highlight ? COLORS.navy : COLORS.gold, border: plan.highlight ? "none" : `1px solid ${COLORS.gold}`, borderRadius: 4, fontSize: 12, letterSpacing: 1, textTransform: "uppercase", fontWeight: 600 }}>
+                      {user?.plan === plan.id ? "Plano Atual" : "Escolher"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════
+// APP ROOT
+// ═══════════════════════════════════════════════
+
+export default function App() {
+  const [screen, setScreen] = useState("landing");
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("arcane_token");
+    const savedUser = localStorage.getItem("arcane_user");
+    if (token && savedUser) {
+      try { setUser(JSON.parse(savedUser)); setScreen("app"); } catch (e) {}
+    }
+    const style = document.createElement("style");
+    style.textContent = globalStyles;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
+
+  const handleAuthSuccess = (u) => { setUser(u); setScreen("app"); };
+  const handleLogout = () => {
+    localStorage.removeItem("arcane_token");
+    localStorage.removeItem("arcane_user");
+    setUser(null); setScreen("landing");
+  };
+
+  if (screen === "app" && user) return <AppDashboard user={user} onLogout={handleLogout} />;
+  if (screen === "login") return <AuthPage mode="login" onSuccess={handleAuthSuccess} onSwitch={() => setScreen("register")} />;
+  if (screen === "register") return <AuthPage mode="register" onSuccess={handleAuthSuccess} onSwitch={() => setScreen("login")} />;
+  return <LandingPage onLogin={() => setScreen("login")} onRegister={() => setScreen("register")} />;
+}
