@@ -59,9 +59,69 @@ const globalStyles = `
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
   }
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.85); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes borderGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0); }
+    50% { box-shadow: 0 0 20px 4px rgba(201,168,76,0.3); }
+  }
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  @keyframes typewriter {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+  @keyframes starTwinkle {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.3); }
+  }
 
   .animate-fadeUp { animation: fadeUp 0.8s ease forwards; }
   .animate-fadeIn { animation: fadeIn 0.6s ease forwards; }
+  .animate-slideInLeft { animation: slideInLeft 0.8s ease forwards; }
+  .animate-slideInRight { animation: slideInRight 0.8s ease forwards; }
+  .animate-scaleIn { animation: scaleIn 0.6s ease forwards; }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-left {
+    opacity: 0;
+    transform: translateX(-30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal-left.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .reveal-right {
+    opacity: 0;
+    transform: translateX(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal-right.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
 
   input, textarea, select {
     background: rgba(255,255,255,0.05);
@@ -97,7 +157,18 @@ const globalStyles = `
     font-size: 14px;
     letter-spacing: 1px;
     text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
   }
+  .btn-gold::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+  }
+  .btn-gold:hover::after { left: 100%; }
   .btn-gold:hover {
     background: linear-gradient(135deg, ${COLORS.goldLight}, ${COLORS.gold});
     transform: translateY(-2px);
@@ -118,6 +189,7 @@ const globalStyles = `
   .btn-outline:hover {
     background: rgba(201,168,76,0.1);
     transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(201,168,76,0.2);
   }
 
   .divider {
@@ -145,6 +217,7 @@ const globalStyles = `
     border-color: rgba(201,168,76,0.4);
     background: rgba(201,168,76,0.05);
     transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.3);
   }
 
   .section {
@@ -256,7 +329,19 @@ const globalStyles = `
     padding: 24px;
     cursor: pointer;
     transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
   }
+  .tool-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, ${COLORS.gold}, ${COLORS.goldLight});
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  .tool-card:hover::before { transform: scaleX(1); }
   .tool-card:hover {
     border-color: rgba(201,168,76,0.4);
     background: rgba(201,168,76,0.05);
@@ -290,12 +375,78 @@ const globalStyles = `
     animation: fadeUp 0.3s ease;
     box-shadow: 0 8px 32px rgba(0,0,0,0.4);
   }
+
+  /* Particle dots */
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    background: ${COLORS.gold};
+    animation: starTwinkle var(--duration, 3s) ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+  }
+
+  /* Step connector line */
+  .step-line {
+    position: absolute;
+    top: 40px;
+    left: calc(50% + 40px);
+    width: calc(100% - 80px);
+    height: 1px;
+    background: linear-gradient(90deg, ${COLORS.gold}, transparent);
+    opacity: 0.3;
+  }
 `;
 
-// ═══════════════════════════════════════════════
-// DADOS
-// ═══════════════════════════════════════════════
+// ── SCROLL REVEAL HOOK ──────────────────────────────────────────
+function useScrollReveal() {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+    const elements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+    elements.forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  });
+}
 
+// ── LOGO ────────────────────────────────────────────────────────
+function Logo({ size = 22 }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div style={{
+        width: size + 8, height: size + 8,
+        background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldDark})`,
+        borderRadius: 3,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: size * 0.6, color: COLORS.navy, fontWeight: 700,
+        boxShadow: `0 4px 15px rgba(201,168,76,0.4)`,
+      }}>◆</div>
+      <span style={{
+        fontFamily: "Cormorant Garamond, serif",
+        fontSize: size, fontWeight: 600, letterSpacing: 3,
+        color: COLORS.white, textTransform: "uppercase",
+      }}>Arcane</span>
+    </div>
+  );
+}
+
+// ── TOAST ───────────────────────────────────────────────────────
+function Toast({ message, onClose }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 3000);
+    return () => clearTimeout(t);
+  }, [onClose]);
+  return <div className="toast">{message}</div>;
+}
+
+// ── MODULES & DATA ───────────────────────────────────────────────
 const MODULES = [
   {
     id: "documentos", icon: "◈", label: "Documentos", color: COLORS.gold,
@@ -335,11 +486,12 @@ const MODULES = [
   },
 ];
 
+// PLANO FREE = 5 gerações, corrigido aqui no frontend
 const PLANS = [
-  { id: "free", name: "Free", price: "R$ 0", period: "", gens: "5 gerações/mês", users: "1 usuário", highlight: false, features: ["4 módulos completos", "Acesso básico", "Suporte por e-mail"] },
-  { id: "starter", name: "Starter", price: "R$ 97", period: "/mês", gens: "150 gerações/mês", users: "3 usuários", highlight: false, features: ["Tudo do Free", "3 usuários", "Suporte prioritário", "Histórico 30 dias"] },
-  { id: "business", name: "Business", price: "R$ 297", period: "/mês", gens: "500 gerações/mês", users: "15 usuários", highlight: true, features: ["Tudo do Starter", "15 usuários", "Acesso à API", "Histórico completo", "Suporte dedicado"] },
-  { id: "unlimited", name: "Unlimited", price: "R$ 897", period: "/mês", gens: "Gerações ilimitadas", users: "Usuários ilimitados", highlight: false, features: ["Tudo do Business", "Usuários ilimitados", "IA personalizada", "SLA dedicado", "Integração customizada", "Treinamento da equipe"] },
+  { id: "free", name: "Free", price: "R$ 0", period: "", gens: "5 gerações/mês", gensLimit: 5, users: "1 usuário", highlight: false, features: ["4 módulos completos", "Acesso básico", "Suporte por e-mail"] },
+  { id: "starter", name: "Starter", price: "R$ 97", period: "/mês", gens: "150 gerações/mês", gensLimit: 150, users: "3 usuários", highlight: false, features: ["Tudo do Free", "3 usuários", "Suporte prioritário", "Histórico 30 dias"] },
+  { id: "business", name: "Business", price: "R$ 297", period: "/mês", gens: "500 gerações/mês", gensLimit: 500, users: "15 usuários", highlight: true, features: ["Tudo do Starter", "15 usuários", "Acesso à API", "Histórico completo", "Suporte dedicado"] },
+  { id: "unlimited", name: "Unlimited", price: "R$ 897", period: "/mês", gens: "Gerações ilimitadas", gensLimit: 99999, users: "Usuários ilimitados", highlight: false, features: ["Tudo do Business", "Usuários ilimitados", "IA personalizada", "SLA dedicado", "Integração customizada", "Treinamento da equipe"] },
 ];
 
 const TESTIMONIALS = [
@@ -359,158 +511,563 @@ const FAQS = [
 const COMPARISON = [
   { feature: "Gerações mensais", arcane: "Até ilimitado", chatgpt: "Limitado", concorrente: "Limitado" },
   { feature: "Focado em empresas", arcane: "✓", chatgpt: "✗", concorrente: "Parcial" },
-  { feature: "Templates prontos", arcane: "✓", chatgpt: "✗", concorrente: "✓" },
-  { feature: "Histórico de gerações", arcane: "✓", chatgpt: "✓", concorrente: "✗" },
-  { feature: "Multi-usuários", arcane: "✓", chatgpt: "✗", concorrente: "✓" },
-  { feature: "Suporte em português", arcane: "✓", chatgpt: "Parcial", concorrente: "✗" },
-  { feature: "Preço acessível", arcane: "✓", chatgpt: "✗", concorrente: "✗" },
+  { feature: "Português nativo", arcane: "✓", chatgpt: "Parcial", concorrente: "✗" },
+  { feature: "Módulos especializados", arcane: "✓", chatgpt: "✗", concorrente: "✗" },
+  { feature: "Suporte dedicado", arcane: "✓", chatgpt: "✗", concorrente: "Parcial" },
+  { feature: "Conformidade LGPD", arcane: "✓", chatgpt: "✗", concorrente: "✗" },
+  { feature: "Preço acessível", arcane: "✓", chatgpt: "✗", concorrente: "Parcial" },
 ];
 
-// ═══════════════════════════════════════════════
-// COMPONENTES
-// ═══════════════════════════════════════════════
+const HOW_IT_WORKS_STEPS = [
+  { number: "01", title: "Crie sua conta", desc: "Cadastre-se gratuitamente em menos de 1 minuto. Sem cartão de crédito necessário.", icon: "◎" },
+  { number: "02", title: "Escolha a ferramenta", desc: "Selecione entre 16 ferramentas especializadas em 4 módulos de negócio.", icon: "◈" },
+  { number: "03", title: "Insira suas informações", desc: "Descreva o que você precisa. Quanto mais detalhes, melhor o resultado.", icon: "◇" },
+  { number: "04", title: "Receba o resultado", desc: "A IA gera seu conteúdo profissional em segundos. Copie, edite e use.", icon: "◆" },
+];
 
-function Logo({ size = 24 }) {
+// ── PARTICLES BACKGROUND ─────────────────────────────────────────
+function Particles() {
+  const particles = Array.from({ length: 20 }, (_, i) => ({
+    id: i,
+    size: Math.random() * 3 + 1,
+    top: Math.random() * 100,
+    left: Math.random() * 100,
+    duration: (Math.random() * 3 + 2).toFixed(1),
+    delay: (Math.random() * 4).toFixed(1),
+    opacity: Math.random() * 0.5 + 0.1,
+  }));
+
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <div style={{
-        width: size + 8, height: size + 8,
-        background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldDark})`,
-        borderRadius: 6,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: size * 0.6, fontWeight: 700, color: COLORS.navy,
-        fontFamily: "Cormorant Garamond, serif",
-      }}>A</div>
-      <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: size, fontWeight: 400, letterSpacing: 2, color: COLORS.white }}>ARCANE</span>
+    <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+      {particles.map(p => (
+        <div key={p.id} className="particle" style={{
+          width: p.size, height: p.size,
+          top: `${p.top}%`, left: `${p.left}%`,
+          opacity: p.opacity,
+          "--duration": `${p.duration}s`,
+          "--delay": `${p.delay}s`,
+        }} />
+      ))}
     </div>
   );
 }
 
-function Toast({ message, onClose }) {
-  useEffect(() => { const t = setTimeout(onClose, 3000); return () => clearTimeout(t); }, [onClose]);
-  return <div className="toast">{message}</div>;
-}
+// ── AUTH PAGE ────────────────────────────────────────────────────
+function AuthPage({ mode, onSuccess, onSwitch }) {
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-// ═══════════════════════════════════════════════
-// LANDING PAGE
-// ═══════════════════════════════════════════════
-
-function LandingPage({ onLogin, onRegister }) {
-  const [openFaq, setOpenFaq] = useState(null);
+  const handle = async () => {
+    setLoading(true); setError("");
+    try {
+      const endpoint = mode === "login" ? "/auth/login" : "/auth/register";
+      const body = mode === "login"
+        ? { email: form.email, password: form.password }
+        : { name: form.name, email: form.email, password: form.password };
+      const res = await fetch(BACKEND_URL + endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao autenticar");
+      localStorage.setItem("arcane_token", data.access_token);
+      localStorage.setItem("arcane_user", JSON.stringify(data.user));
+      onSuccess(data.user);
+    } catch (e) { setError(e.message); }
+    setLoading(false);
+  };
 
   return (
-    <div style={{ background: COLORS.navy, minHeight: "100vh" }}>
+    <div style={{
+      minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+      background: COLORS.navy, padding: 24, position: "relative",
+    }}>
+      <Particles />
+      <div style={{
+        background: `linear-gradient(135deg, ${COLORS.navyLight}, ${COLORS.navyMid})`,
+        border: `1px solid rgba(201,168,76,0.2)`,
+        borderRadius: 12, padding: "48px 40px", width: "100%", maxWidth: 420,
+        position: "relative", zIndex: 1,
+        boxShadow: "0 32px 80px rgba(0,0,0,0.5)",
+        animation: "scaleIn 0.5s ease forwards",
+      }}>
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <Logo size={20} />
+          <div style={{ marginTop: 24, color: COLORS.gray, fontSize: 14 }}>
+            {mode === "login" ? "Bem-vindo de volta" : "Comece gratuitamente hoje"}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {mode === "register" && (
+            <div>
+              <label style={{ fontSize: 12, color: COLORS.gray, letterSpacing: 1, textTransform: "uppercase", display: "block", marginBottom: 8 }}>Nome completo</label>
+              <input placeholder="Seu nome" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+            </div>
+          )}
+          <div>
+            <label style={{ fontSize: 12, color: COLORS.gray, letterSpacing: 1, textTransform: "uppercase", display: "block", marginBottom: 8 }}>E-mail</label>
+            <input type="email" placeholder="seu@email.com" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+          </div>
+          <div>
+            <label style={{ fontSize: 12, color: COLORS.gray, letterSpacing: 1, textTransform: "uppercase", display: "block", marginBottom: 8 }}>Senha</label>
+            <input type="password" placeholder="••••••••" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })}
+              onKeyDown={e => e.key === "Enter" && handle()} />
+          </div>
+
+          {error && (
+            <div style={{ background: "rgba(255,80,80,0.1)", border: "1px solid rgba(255,80,80,0.3)", borderRadius: 6, padding: "12px 16px", fontSize: 13, color: "#ff8080" }}>
+              {error}
+            </div>
+          )}
+
+          <button className="btn-gold" onClick={handle} disabled={loading}
+            style={{ width: "100%", marginTop: 8, opacity: loading ? 0.7 : 1, fontSize: 13 }}>
+            {loading ? "Aguarde..." : mode === "login" ? "Entrar na plataforma" : "Criar conta grátis"}
+          </button>
+        </div>
+
+        <div style={{ textAlign: "center", marginTop: 28, color: COLORS.gray, fontSize: 13 }}>
+          {mode === "login" ? "Não tem conta?" : "Já tem conta?"}{" "}
+          <span onClick={onSwitch} style={{ color: COLORS.gold, cursor: "pointer", textDecoration: "underline" }}>
+            {mode === "login" ? "Criar gratuitamente" : "Entrar"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── APP DASHBOARD ────────────────────────────────────────────────
+function AppDashboard({ user, onLogout }) {
+  const [activeModule, setActiveModule] = useState("documentos");
+  const [activeTool, setActiveTool] = useState(null);
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState("");
+  const [usageData, setUsageData] = useState(null);
+
+  const currentModule = MODULES.find(m => m.id === activeModule);
+  const plan = PLANS.find(p => p.id === (user.plan || "free")) || PLANS[0];
+
+  useEffect(() => {
+    fetchUsage();
+  }, []);
+
+  const fetchUsage = async () => {
+    try {
+      const token = localStorage.getItem("arcane_token");
+      const res = await fetch(BACKEND_URL + "/user/usage", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUsageData(data);
+      }
+    } catch (e) {}
+  };
+
+  // Corrected limit display: use plan limits from frontend, not backend raw values
+  const usedCount = usageData?.used ?? 0;
+  const limitCount = plan.gensLimit;
+  const usagePct = limitCount >= 99999 ? 0 : Math.min((usedCount / limitCount) * 100, 100);
+  const remaining = limitCount >= 99999 ? "∞" : Math.max(limitCount - usedCount, 0);
+
+  const generate = async () => {
+    if (!activeTool || !input.trim()) return;
+    if (remaining !== "∞" && remaining <= 0) {
+      setToast("Limite de gerações atingido. Faça upgrade do plano!");
+      return;
+    }
+    setLoading(true); setResult("");
+    try {
+      const token = localStorage.getItem("arcane_token");
+      const res = await fetch(BACKEND_URL + "/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ tool_id: activeTool.id, prompt: activeTool.prompt, user_input: input }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao gerar");
+      setResult(data.result || data.content || "");
+      fetchUsage();
+    } catch (e) { setToast(e.message); }
+    setLoading(false);
+  };
+
+  const copyResult = () => {
+    navigator.clipboard.writeText(result);
+    setToast("Copiado para a área de transferência!");
+  };
+
+  return (
+    <div style={{ display: "flex", minHeight: "100vh" }}>
+      <style>{globalStyles}</style>
+
+      {/* SIDEBAR */}
+      <div className="sidebar">
+        <div className="sidebar-logo">
+          <Logo size={17} />
+        </div>
+
+        <div style={{ flex: 1, overflowY: "auto" }}>
+          {MODULES.map(mod => (
+            <div key={mod.id} className={`nav-item ${activeModule === mod.id ? "active" : ""}`}
+              onClick={() => { setActiveModule(mod.id); setActiveTool(null); setResult(""); }}>
+              <span style={{ color: mod.color, fontSize: 16 }}>{mod.icon}</span>
+              <span>{mod.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ padding: "24px 28px", borderTop: `1px solid rgba(201,168,76,0.15)` }}>
+          <div style={{ fontSize: 11, color: COLORS.gray, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>
+            Plano {plan.name}
+          </div>
+          <div style={{ fontSize: 12, color: COLORS.grayLight, marginBottom: 6 }}>
+            {remaining === "∞" ? "Ilimitado" : `${remaining} de ${limitCount} restantes`}
+          </div>
+          <div className="usage-bar">
+            <div className="usage-fill" style={{ width: `${usagePct}%` }} />
+          </div>
+          <div onClick={onLogout} style={{ marginTop: 20, fontSize: 13, color: COLORS.gray, cursor: "pointer" }}
+            onMouseEnter={e => e.target.style.color = COLORS.white}
+            onMouseLeave={e => e.target.style.color = COLORS.gray}>
+            ← Sair
+          </div>
+        </div>
+      </div>
+
+      {/* MAIN */}
+      <div className="main-content">
+        <div className="topbar">
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 500 }}>{currentModule?.label}</div>
+            <div style={{ fontSize: 12, color: COLORS.gray }}>{currentModule?.tools.length} ferramentas disponíveis</div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 13, color: COLORS.grayLight }}>{user.name || user.email}</div>
+              <div style={{ fontSize: 11, color: COLORS.gold }}>{plan.name}</div>
+            </div>
+            <div style={{
+              width: 36, height: 36, borderRadius: "50%",
+              background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldDark})`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 14, fontWeight: 600, color: COLORS.navy,
+            }}>
+              {(user.name || user.email || "U")[0].toUpperCase()}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ padding: 32 }}>
+          {!activeTool ? (
+            <>
+              <div style={{ marginBottom: 32 }}>
+                <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 28, fontWeight: 300, marginBottom: 8 }}>
+                  Módulo de <em style={{ color: COLORS.gold }}>{currentModule?.label}</em>
+                </h2>
+                <p style={{ color: COLORS.gray, fontSize: 14 }}>Selecione uma ferramenta para começar a gerar</p>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 20 }}>
+                {currentModule?.tools.map(tool => (
+                  <div key={tool.id} className="tool-card" onClick={() => setActiveTool(tool)}>
+                    <div style={{ fontSize: 10, color: currentModule.color, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>
+                      {currentModule.icon} {currentModule.label}
+                    </div>
+                    <div style={{ fontSize: 16, fontWeight: 500, marginBottom: 8 }}>{tool.name}</div>
+                    <div style={{ fontSize: 13, color: COLORS.gray, lineHeight: 1.6 }}>{tool.desc}</div>
+                    <div style={{ marginTop: 20, fontSize: 12, color: COLORS.gold }}>Usar ferramenta →</div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <button onClick={() => { setActiveTool(null); setResult(""); setInput(""); }}
+                style={{ background: "transparent", color: COLORS.gray, fontSize: 13, marginBottom: 24, padding: 0 }}
+                onMouseEnter={e => e.target.style.color = COLORS.white}
+                onMouseLeave={e => e.target.style.color = COLORS.gray}>
+                ← Voltar
+              </button>
+
+              <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 28, fontWeight: 300, marginBottom: 8 }}>
+                {activeTool.name}
+              </h2>
+              <p style={{ color: COLORS.gray, fontSize: 14, marginBottom: 32 }}>{activeTool.desc}</p>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+                <div>
+                  <label style={{ fontSize: 12, color: COLORS.gray, letterSpacing: 1, textTransform: "uppercase", display: "block", marginBottom: 12 }}>
+                    Descreva o que você precisa
+                  </label>
+                  <textarea
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    placeholder="Ex: Contrato de prestação de serviços entre empresa X e Y, valor R$ 5.000, prazo 3 meses..."
+                    rows={8}
+                    style={{ resize: "vertical" }}
+                  />
+                  <button className="btn-gold" onClick={generate} disabled={loading || !input.trim()}
+                    style={{ marginTop: 16, width: "100%", opacity: loading || !input.trim() ? 0.6 : 1 }}>
+                    {loading ? "Gerando..." : "✦ Gerar com IA"}
+                  </button>
+                </div>
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                    <label style={{ fontSize: 12, color: COLORS.gray, letterSpacing: 1, textTransform: "uppercase" }}>Resultado</label>
+                    {result && (
+                      <button onClick={copyResult} style={{ background: "transparent", color: COLORS.gold, fontSize: 12, padding: 0 }}>
+                        Copiar ↗
+                      </button>
+                    )}
+                  </div>
+                  <div className="result-box">
+                    {loading ? (
+                      <div style={{ display: "flex", alignItems: "center", gap: 12, color: COLORS.gray }}>
+                        <div style={{ animation: "pulse 1.5s ease infinite" }}>✦</div>
+                        Gerando seu conteúdo...
+                      </div>
+                    ) : result || (
+                      <span style={{ color: COLORS.gray }}>O resultado aparecerá aqui...</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {toast && <Toast message={toast} onClose={() => setToast("")} />}
+    </div>
+  );
+}
+
+// ── LANDING PAGE ─────────────────────────────────────────────────
+function LandingPage({ onLogin, onRegister }) {
+  const [openFaq, setOpenFaq] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
+  useScrollReveal();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <div style={{ background: COLORS.navy, minHeight: "100vh", overflowX: "hidden" }}>
+      <style>{globalStyles}</style>
+
       {/* NAV */}
       <nav style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-        background: "rgba(10,15,30,0.95)", backdropFilter: "blur(20px)",
-        borderBottom: `1px solid rgba(201,168,76,0.15)`,
-        padding: "0 40px", height: 72,
+        padding: "0 48px", height: 72,
         display: "flex", alignItems: "center", justifyContent: "space-between",
+        background: scrolled ? `rgba(10,15,30,0.95)` : "transparent",
+        backdropFilter: scrolled ? "blur(20px)" : "none",
+        borderBottom: scrolled ? `1px solid rgba(201,168,76,0.15)` : "none",
+        transition: "all 0.4s ease",
       }}>
-        <Logo size={22} />
-        <div style={{ display: "flex", gap: 32, alignItems: "center" }}>
-          {["Módulos", "Planos", "FAQ"].map(item => (
-            <a key={item} href={`#${item.toLowerCase()}`} style={{ color: COLORS.gray, textDecoration: "none", fontSize: 14, letterSpacing: 0.5, transition: "color 0.2s" }}
+        <Logo size={20} />
+        <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
+          {["Como Funciona", "Ferramentas", "Planos", "FAQ"].map(item => (
+            <a key={item} href={`#${item.toLowerCase().replace(" ", "-")}`}
+              style={{ color: COLORS.gray, fontSize: 14, textDecoration: "none", transition: "color 0.2s" }}
               onMouseEnter={e => e.target.style.color = COLORS.gold}
               onMouseLeave={e => e.target.style.color = COLORS.gray}>
               {item}
             </a>
           ))}
-          <button className="btn-outline" onClick={onLogin} style={{ padding: "10px 24px" }}>Entrar</button>
-          <button className="btn-gold" onClick={onRegister} style={{ padding: "10px 24px" }}>Começar Grátis</button>
+          <button className="btn-outline" onClick={onLogin} style={{ padding: "10px 24px", fontSize: 13 }}>Entrar</button>
+          <button className="btn-gold" onClick={onRegister} style={{ padding: "10px 24px", fontSize: 13 }}>Começar Grátis</button>
         </div>
       </nav>
 
       {/* HERO */}
-      <section style={{
-        minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-        padding: "120px 40px 80px",
-        position: "relative", overflow: "hidden",
-      }}>
-        {/* Background ornaments */}
+      <section style={{ minHeight: "100vh", display: "flex", alignItems: "center", position: "relative", overflow: "hidden", paddingTop: 72 }}>
+        <Particles />
+
+        {/* Background glow */}
         <div style={{
-          position: "absolute", top: "20%", right: "10%",
-          width: 400, height: 400,
+          position: "absolute", top: "20%", left: "50%", transform: "translateX(-50%)",
+          width: 600, height: 600,
           background: `radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%)`,
           pointerEvents: "none",
         }} />
-        <div style={{
-          position: "absolute", bottom: "10%", left: "5%",
-          width: 300, height: 300,
-          background: `radial-gradient(circle, rgba(107,181,255,0.06) 0%, transparent 70%)`,
-          pointerEvents: "none",
-        }} />
-        {/* Grid pattern */}
-        <div style={{
-          position: "absolute", inset: 0, opacity: 0.03,
-          backgroundImage: `linear-gradient(${COLORS.gold} 1px, transparent 1px), linear-gradient(90deg, ${COLORS.gold} 1px, transparent 1px)`,
-          backgroundSize: "60px 60px",
-          pointerEvents: "none",
-        }} />
 
-        <div style={{ maxWidth: 900, textAlign: "center", position: "relative" }}>
-          <div className="tag">Workspace Inteligente para Empresas</div>
-          <h1 style={{
-            fontFamily: "Cormorant Garamond, serif",
-            fontSize: "clamp(48px, 7vw, 88px)",
-            fontWeight: 300, lineHeight: 1.1,
-            marginBottom: 28,
-            animation: "fadeUp 0.8s ease forwards",
-          }}>
-            Automatize o trabalho<br />que consome <em style={{ color: COLORS.gold, fontStyle: "italic" }}>horas</em>
-          </h1>
-          <p style={{
-            color: COLORS.gray, fontSize: 18, lineHeight: 1.8,
-            maxWidth: 600, margin: "0 auto 48px",
-            animation: "fadeUp 0.8s 0.2s ease both",
-          }}>
-            Documentos, dados, produtividade e conteúdo — tudo com inteligência artificial de última geração, numa única plataforma.
-          </p>
-          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", animation: "fadeUp 0.8s 0.4s ease both" }}>
-            <button className="btn-gold" onClick={onRegister} style={{ fontSize: 15 }}>Criar Conta Grátis</button>
-            <button className="btn-outline" onClick={onLogin} style={{ fontSize: 15 }}>Ver Demonstração</button>
-          </div>
-          <p style={{ marginTop: 20, color: COLORS.gray, fontSize: 13 }}>
-            Sem cartão de crédito · 5 gerações grátis · Cancele quando quiser
-          </p>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 48px", position: "relative", zIndex: 1 }}>
+          <div style={{ maxWidth: 760 }}>
+            <div className="tag animate-fadeIn" style={{ animationDelay: "0.2s", opacity: 0 }}>
+              ✦ Plataforma de IA para Empresas
+            </div>
+            <h1 className="animate-fadeUp" style={{
+              fontFamily: "Cormorant Garamond, serif",
+              fontSize: "clamp(48px, 7vw, 88px)",
+              fontWeight: 300, lineHeight: 1.1, marginBottom: 28,
+              animationDelay: "0.3s", opacity: 0,
+            }}>
+              Gere conteúdo<br />
+              profissional com<br />
+              <em style={{
+                color: COLORS.gold,
+                background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldLight}, ${COLORS.gold})`,
+                backgroundSize: "200% auto",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                animation: "shimmer 3s linear infinite",
+              }}>inteligência artificial</em>
+            </h1>
+            <p className="animate-fadeUp" style={{
+              color: COLORS.gray, fontSize: 18, lineHeight: 1.8, marginBottom: 48, maxWidth: 560,
+              animationDelay: "0.5s", opacity: 0,
+            }}>
+              16 ferramentas especializadas em documentos, dados, produtividade e conteúdo. Resultados profissionais em segundos.
+            </p>
+            <div className="animate-fadeUp" style={{ display: "flex", gap: 16, animationDelay: "0.7s", opacity: 0 }}>
+              <button className="btn-gold" onClick={onRegister} style={{ fontSize: 15, padding: "16px 40px" }}>
+                Começar Gratuitamente
+              </button>
+              <button className="btn-outline" onClick={onLogin} style={{ fontSize: 15, padding: "16px 40px" }}>
+                Já tenho conta
+              </button>
+            </div>
 
-          {/* Stats */}
-          <div style={{
-            display: "flex", gap: 48, justifyContent: "center", marginTop: 72,
-            padding: "40px 0", borderTop: `1px solid rgba(201,168,76,0.15)`,
-            animation: "fadeIn 1s 0.6s ease both",
-          }}>
-            {[["16", "Ferramentas"], ["4", "Módulos"], ["500+", "Empresas"], ["98%", "Satisfação"]].map(([num, label]) => (
-              <div key={label} style={{ textAlign: "center" }}>
-                <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 42, fontWeight: 300, color: COLORS.gold }}>{num}</div>
-                <div style={{ color: COLORS.gray, fontSize: 13, letterSpacing: 1 }}>{label}</div>
-              </div>
-            ))}
+            {/* Stats */}
+            <div className="animate-fadeUp" style={{
+              display: "flex", gap: 48, marginTop: 64,
+              animationDelay: "0.9s", opacity: 0,
+            }}>
+              {[
+                { n: "16", label: "Ferramentas de IA" },
+                { n: "4", label: "Módulos especializados" },
+                { n: "< 30s", label: "Tempo de geração" },
+              ].map(stat => (
+                <div key={stat.n}>
+                  <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 36, fontWeight: 300, color: COLORS.gold }}>{stat.n}</div>
+                  <div style={{ fontSize: 13, color: COLORS.gray, marginTop: 4 }}>{stat.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* MÓDULOS */}
-      <section id="módulos" style={{ padding: "100px 40px", background: COLORS.navyLight }}>
+      {/* COMO FUNCIONA */}
+      <section id="como-funciona" style={{ padding: "120px 48px", background: COLORS.navyLight, position: "relative", overflow: "hidden" }}>
+        <div style={{
+          position: "absolute", top: 0, left: 0, right: 0, height: 1,
+          background: `linear-gradient(90deg, transparent, ${COLORS.gold}, transparent)`,
+        }} />
+        <div style={{
+          position: "absolute", bottom: 0, left: 0, right: 0, height: 1,
+          background: `linear-gradient(90deg, transparent, ${COLORS.gold}, transparent)`,
+        }} />
+
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <div className="tag">Módulos</div>
-          <h2 className="section-title">Tudo que sua empresa precisa,<br /><em className="gold">numa só plataforma</em></h2>
-          <div className="gold-line" />
-          <p className="section-subtitle" style={{ marginBottom: 60 }}>
-            16 ferramentas de IA organizadas em 4 módulos estratégicos para acelerar cada área do seu negócio.
-          </p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
-            {MODULES.map(mod => (
-              <div key={mod.id} className="card" onClick={onRegister} style={{ cursor: "pointer" }}>
-                <div style={{ fontSize: 32, marginBottom: 16, color: mod.color }}>{mod.icon}</div>
-                <h3 style={{ fontSize: 20, fontFamily: "Cormorant Garamond, serif", fontWeight: 400, marginBottom: 8 }}>{mod.label}</h3>
-                <div style={{ width: 32, height: 1, background: mod.color, marginBottom: 16 }} />
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {mod.tools.map(t => (
-                    <div key={t.id} style={{ color: COLORS.gray, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ color: mod.color, fontSize: 10 }}>▸</span>
-                      {t.name}
+          <div style={{ textAlign: "center", marginBottom: 80 }}>
+            <div className="tag reveal">Como Funciona</div>
+            <h2 className="section-title reveal" style={{ textAlign: "center", marginBottom: 16 }}>
+              Do zero ao resultado<br /><em style={{ color: COLORS.gold }}>em 4 passos simples</em>
+            </h2>
+            <p className="reveal" style={{ color: COLORS.gray, fontSize: 16, maxWidth: 480, margin: "0 auto" }}>
+              Sem curva de aprendizado. Sem complicação. Você começa a usar em minutos.
+            </p>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 32, position: "relative" }}>
+            {/* Connector line */}
+            <div style={{
+              position: "absolute", top: 44, left: "12.5%", right: "12.5%",
+              height: 1,
+              background: `linear-gradient(90deg, ${COLORS.gold}, rgba(201,168,76,0.3), ${COLORS.gold})`,
+              opacity: 0.3,
+              zIndex: 0,
+            }} />
+
+            {HOW_IT_WORKS_STEPS.map((step, i) => (
+              <div key={i} className="reveal" style={{
+                textAlign: "center", position: "relative", zIndex: 1,
+                transitionDelay: `${i * 0.15}s`,
+              }}>
+                {/* Circle */}
+                <div style={{
+                  width: 88, height: 88,
+                  background: `linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05))`,
+                  border: `1px solid rgba(201,168,76,0.4)`,
+                  borderRadius: "50%",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  margin: "0 auto 24px",
+                  boxShadow: `0 0 40px rgba(201,168,76,0.1)`,
+                  transition: "all 0.3s",
+                  cursor: "default",
+                }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.boxShadow = `0 0 60px rgba(201,168,76,0.3)`;
+                    e.currentTarget.style.borderColor = COLORS.gold;
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.boxShadow = `0 0 40px rgba(201,168,76,0.1)`;
+                    e.currentTarget.style.borderColor = `rgba(201,168,76,0.4)`;
+                  }}
+                >
+                  <span style={{ color: COLORS.gold, fontSize: 28 }}>{step.icon}</span>
+                </div>
+
+                <div style={{
+                  fontSize: 11, color: COLORS.gold, letterSpacing: 3,
+                  textTransform: "uppercase", marginBottom: 12,
+                }}>Passo {step.number}</div>
+                <div style={{ fontSize: 17, fontWeight: 500, marginBottom: 12 }}>{step.title}</div>
+                <div style={{ fontSize: 14, color: COLORS.gray, lineHeight: 1.7 }}>{step.desc}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA inline */}
+          <div style={{ textAlign: "center", marginTop: 72 }}>
+            <button className="btn-gold reveal" onClick={onRegister} style={{ fontSize: 15, padding: "16px 48px" }}>
+              Experimentar Agora — É Grátis
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* FERRAMENTAS */}
+      <section id="ferramentas" style={{ padding: "120px 48px" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div style={{ marginBottom: 64 }}>
+            <div className="tag reveal">Ferramentas</div>
+            <h2 className="section-title reveal">16 ferramentas para<br /><em style={{ color: COLORS.gold }}>cada necessidade</em></h2>
+            <div className="gold-line reveal" />
+            <p className="section-subtitle reveal">Módulos especializados para cobrir todas as áreas estratégicas do seu negócio.</p>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 24 }}>
+            {MODULES.map((mod, mi) => (
+              <div key={mod.id} className={`card reveal${mi % 2 === 0 ? "-left" : "-right"}`}
+                style={{ transitionDelay: `${mi * 0.1}s` }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+                  <span style={{ fontSize: 24, color: mod.color }}>{mod.icon}</span>
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 500 }}>{mod.label}</div>
+                    <div style={{ fontSize: 12, color: COLORS.gray }}>{mod.tools.length} ferramentas</div>
+                  </div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  {mod.tools.map(tool => (
+                    <div key={tool.id} style={{
+                      background: "rgba(255,255,255,0.02)",
+                      border: "1px solid rgba(201,168,76,0.08)",
+                      borderRadius: 6, padding: "10px 14px",
+                      fontSize: 13, color: COLORS.grayLight,
+                    }}>
+                      {tool.name}
                     </div>
                   ))}
                 </div>
@@ -521,22 +1078,27 @@ function LandingPage({ onLogin, onRegister }) {
       </section>
 
       {/* DEPOIMENTOS */}
-      <section style={{ padding: "100px 40px" }}>
+      <section style={{ padding: "120px 48px", background: COLORS.navyLight }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <div className="tag">Depoimentos</div>
-          <h2 className="section-title">O que nossos clientes<br /><em className="gold">estão dizendo</em></h2>
-          <div className="gold-line" style={{ marginBottom: 60 }} />
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 24 }}>
+          <div style={{ textAlign: "center", marginBottom: 64 }}>
+            <div className="tag reveal">Depoimentos</div>
+            <h2 className="section-title reveal" style={{ textAlign: "center" }}>
+              O que nossos clientes<br /><em style={{ color: COLORS.gold }}>estão dizendo</em>
+            </h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
             {TESTIMONIALS.map((t, i) => (
-              <div key={i} className="card">
-                <div style={{ fontSize: 40, color: COLORS.gold, fontFamily: "serif", lineHeight: 1, marginBottom: 16 }}>"</div>
-                <p style={{ color: COLORS.grayLight, fontSize: 15, lineHeight: 1.8, marginBottom: 24 }}>{t.text}</p>
+              <div key={i} className="card reveal" style={{ transitionDelay: `${i * 0.15}s` }}>
+                <div style={{ color: COLORS.gold, fontSize: 24, marginBottom: 16, letterSpacing: -2 }}>✦✦✦✦✦</div>
+                <p style={{ fontSize: 15, color: COLORS.grayLight, lineHeight: 1.8, marginBottom: 24, fontStyle: "italic" }}>
+                  "{t.text}"
+                </p>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <div style={{
-                    width: 44, height: 44, borderRadius: "50%",
+                    width: 40, height: 40, borderRadius: "50%",
                     background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldDark})`,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    color: COLORS.navy, fontWeight: 700, fontSize: 16,
+                    fontSize: 16, fontWeight: 600, color: COLORS.navy,
                   }}>{t.avatar}</div>
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 500 }}>{t.name}</div>
@@ -550,40 +1112,31 @@ function LandingPage({ onLogin, onRegister }) {
       </section>
 
       {/* COMPARATIVO */}
-      <section style={{ padding: "100px 40px", background: COLORS.navyLight }}>
+      <section style={{ padding: "120px 48px" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <div className="tag">Comparativo</div>
-          <h2 className="section-title">Por que escolher<br /><em className="gold">o Arcane?</em></h2>
-          <div className="gold-line" style={{ marginBottom: 48 }} />
-          <div style={{ overflowX: "auto" }}>
+          <div style={{ marginBottom: 64, textAlign: "center" }}>
+            <div className="tag reveal">Comparativo</div>
+            <h2 className="section-title reveal" style={{ textAlign: "center" }}>
+              Por que escolher<br /><em style={{ color: COLORS.gold }}>o Arcane?</em>
+            </h2>
+          </div>
+          <div className="reveal" style={{ borderRadius: 10, overflow: "hidden", border: `1px solid rgba(201,168,76,0.2)` }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
-                <tr>
-                  <th style={{ padding: "16px 20px", textAlign: "left", color: COLORS.gray, fontSize: 13, fontWeight: 400, letterSpacing: 1, borderBottom: `1px solid rgba(201,168,76,0.15)` }}>RECURSO</th>
-                  {["Arcane", "ChatGPT", "Concorrentes"].map(h => (
-                    <th key={h} style={{
-                      padding: "16px 20px", textAlign: "center",
-                      color: h === "Arcane" ? COLORS.gold : COLORS.gray,
-                      fontSize: 13, fontWeight: h === "Arcane" ? 600 : 400,
-                      letterSpacing: 1,
-                      borderBottom: `1px solid rgba(201,168,76,0.15)`,
-                      background: h === "Arcane" ? "rgba(201,168,76,0.05)" : "transparent",
-                    }}>{h.toUpperCase()}</th>
-                  ))}
+                <tr style={{ background: `rgba(201,168,76,0.1)` }}>
+                  <th style={{ padding: "16px 24px", textAlign: "left", fontSize: 13, color: COLORS.gray, fontWeight: 400 }}>Recurso</th>
+                  <th style={{ padding: "16px 24px", textAlign: "center", fontSize: 13, color: COLORS.gold, fontWeight: 600 }}>Arcane</th>
+                  <th style={{ padding: "16px 24px", textAlign: "center", fontSize: 13, color: COLORS.gray, fontWeight: 400 }}>ChatGPT</th>
+                  <th style={{ padding: "16px 24px", textAlign: "center", fontSize: 13, color: COLORS.gray, fontWeight: 400 }}>Concorrentes</th>
                 </tr>
               </thead>
               <tbody>
                 {COMPARISON.map((row, i) => (
-                  <tr key={i} style={{ borderBottom: `1px solid rgba(255,255,255,0.04)` }}>
-                    <td style={{ padding: "14px 20px", color: COLORS.grayLight, fontSize: 14 }}>{row.feature}</td>
-                    {[row.arcane, row.chatgpt, row.concorrente].map((val, j) => (
-                      <td key={j} style={{
-                        padding: "14px 20px", textAlign: "center",
-                        color: j === 0 ? COLORS.gold : val === "✗" ? "#ff6b6b" : COLORS.gray,
-                        fontSize: 14, fontWeight: j === 0 ? 500 : 400,
-                        background: j === 0 ? "rgba(201,168,76,0.03)" : "transparent",
-                      }}>{val}</td>
-                    ))}
+                  <tr key={i} style={{ borderTop: `1px solid rgba(201,168,76,0.08)`, background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)" }}>
+                    <td style={{ padding: "14px 24px", fontSize: 14, color: COLORS.grayLight }}>{row.feature}</td>
+                    <td style={{ padding: "14px 24px", textAlign: "center", fontSize: 14, color: COLORS.gold, fontWeight: 600 }}>{row.arcane}</td>
+                    <td style={{ padding: "14px 24px", textAlign: "center", fontSize: 14, color: row.chatgpt === "✗" ? "#ff8080" : COLORS.gray }}>{row.chatgpt}</td>
+                    <td style={{ padding: "14px 24px", textAlign: "center", fontSize: 14, color: row.concorrente === "✗" ? "#ff8080" : COLORS.gray }}>{row.concorrente}</td>
                   </tr>
                 ))}
               </tbody>
@@ -593,19 +1146,22 @@ function LandingPage({ onLogin, onRegister }) {
       </section>
 
       {/* PLANOS */}
-      <section id="planos" style={{ padding: "100px 40px" }}>
+      <section id="planos" style={{ padding: "120px 48px", background: COLORS.navyLight }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <div className="tag">Planos</div>
-          <h2 className="section-title">Escolha o plano<br /><em className="gold">ideal para você</em></h2>
-          <div className="gold-line" style={{ marginBottom: 60 }} />
+          <div style={{ textAlign: "center", marginBottom: 64 }}>
+            <div className="tag reveal">Planos</div>
+            <h2 className="section-title reveal" style={{ textAlign: "center" }}>Escolha o plano<br /><em style={{ color: COLORS.gold }}>ideal para você</em></h2>
+          </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 24 }}>
-            {PLANS.map(plan => (
-              <div key={plan.id} style={{
+            {PLANS.map((plan, i) => (
+              <div key={plan.id} className="reveal" style={{
                 background: plan.highlight ? "rgba(201,168,76,0.08)" : "rgba(255,255,255,0.03)",
                 border: `1px solid ${plan.highlight ? COLORS.gold : "rgba(201,168,76,0.15)"}`,
                 borderRadius: 8, padding: 32,
                 position: "relative",
                 transform: plan.highlight ? "scale(1.02)" : "scale(1)",
+                animation: plan.highlight ? "borderGlow 3s ease-in-out infinite" : "none",
+                transitionDelay: `${i * 0.1}s`,
               }}>
                 {plan.highlight && (
                   <div style={{
@@ -614,7 +1170,7 @@ function LandingPage({ onLogin, onRegister }) {
                     color: COLORS.navy, fontSize: 11, fontWeight: 700,
                     padding: "4px 16px", borderRadius: 20, letterSpacing: 1,
                     whiteSpace: "nowrap",
-                  }}>RECOMENDADO</div>
+                  }}>⭐ RECOMENDADO</div>
                 )}
                 <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>{plan.name}</div>
                 <div style={{ marginBottom: 4 }}>
@@ -624,14 +1180,14 @@ function LandingPage({ onLogin, onRegister }) {
                 <div style={{ color: COLORS.gray, fontSize: 13, marginBottom: 24 }}>{plan.gens} · {plan.users}</div>
                 <div style={{ height: 1, background: "rgba(201,168,76,0.15)", marginBottom: 24 }} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 32 }}>
-                  {plan.features.map((f, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: COLORS.grayLight }}>
+                  {plan.features.map((f, fi) => (
+                    <div key={fi} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: COLORS.grayLight }}>
                       <span style={{ color: COLORS.gold, fontSize: 10 }}>✓</span> {f}
                     </div>
                   ))}
                 </div>
                 <button
-                  onClick={plan.id === "free" ? onRegister : onRegister}
+                  onClick={onRegister}
                   style={{
                     width: "100%", padding: "14px",
                     background: plan.highlight ? `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldDark})` : "transparent",
@@ -653,18 +1209,19 @@ function LandingPage({ onLogin, onRegister }) {
       </section>
 
       {/* FAQ */}
-      <section id="faq" style={{ padding: "100px 40px", background: COLORS.navyLight }}>
+      <section id="faq" style={{ padding: "120px 48px" }}>
         <div style={{ maxWidth: 760, margin: "0 auto" }}>
-          <div className="tag">FAQ</div>
-          <h2 className="section-title">Perguntas<br /><em className="gold">frequentes</em></h2>
-          <div className="gold-line" style={{ marginBottom: 48 }} />
+          <div className="tag reveal">FAQ</div>
+          <h2 className="section-title reveal">Perguntas<br /><em style={{ color: COLORS.gold }}>frequentes</em></h2>
+          <div className="gold-line reveal" style={{ marginBottom: 48 }} />
           <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {FAQS.map((faq, i) => (
-              <div key={i} style={{
+              <div key={i} className="reveal" style={{
                 border: `1px solid rgba(201,168,76,${openFaq === i ? "0.3" : "0.12"})`,
                 borderRadius: 6, overflow: "hidden",
                 background: openFaq === i ? "rgba(201,168,76,0.05)" : "transparent",
                 transition: "all 0.3s",
+                transitionDelay: `${i * 0.05}s`,
               }}>
                 <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{
                   width: "100%", padding: "20px 24px",
@@ -673,10 +1230,12 @@ function LandingPage({ onLogin, onRegister }) {
                   fontSize: 15, textAlign: "left", fontWeight: 400,
                 }}>
                   {faq.q}
-                  <span style={{ color: COLORS.gold, fontSize: 20, lineHeight: 1, flexShrink: 0, marginLeft: 16 }}>{openFaq === i ? "−" : "+"}</span>
+                  <span style={{ color: COLORS.gold, fontSize: 20, lineHeight: 1, flexShrink: 0, marginLeft: 16 }}>
+                    {openFaq === i ? "−" : "+"}
+                  </span>
                 </button>
                 {openFaq === i && (
-                  <div style={{ padding: "0 24px 20px", color: COLORS.gray, fontSize: 14, lineHeight: 1.8 }}>
+                  <div style={{ padding: "0 24px 20px", color: COLORS.gray, fontSize: 14, lineHeight: 1.8, animation: "fadeUp 0.3s ease" }}>
                     {faq.a}
                   </div>
                 )}
@@ -687,24 +1246,34 @@ function LandingPage({ onLogin, onRegister }) {
       </section>
 
       {/* CTA FINAL */}
-      <section style={{ padding: "100px 40px", textAlign: "center" }}>
-        <div style={{ maxWidth: 700, margin: "0 auto" }}>
-          <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "clamp(36px, 5vw, 64px)", fontWeight: 300, lineHeight: 1.2, marginBottom: 24 }}>
+      <section style={{ padding: "120px 48px", background: COLORS.navyLight, textAlign: "center", position: "relative", overflow: "hidden" }}>
+        <div style={{
+          position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+          width: 500, height: 500,
+          background: `radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%)`,
+          pointerEvents: "none",
+        }} />
+        <div style={{ maxWidth: 700, margin: "0 auto", position: "relative", zIndex: 1 }}>
+          <div className="tag reveal" style={{ margin: "0 auto 20px" }}>Comece Hoje</div>
+          <div className="reveal" style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "clamp(36px, 5vw, 64px)", fontWeight: 300, lineHeight: 1.2, marginBottom: 24 }}>
             Pronto para transformar<br />sua <em style={{ color: COLORS.gold }}>produtividade?</em>
           </div>
-          <p style={{ color: COLORS.gray, fontSize: 16, marginBottom: 40 }}>
+          <p className="reveal" style={{ color: COLORS.gray, fontSize: 16, marginBottom: 40 }}>
             Junte-se a centenas de empresas que já usam o Arcane para trabalhar de forma mais inteligente.
           </p>
-          <button className="btn-gold" onClick={onRegister} style={{ fontSize: 16, padding: "18px 48px" }}>
+          <button className="btn-gold reveal" onClick={onRegister} style={{ fontSize: 16, padding: "18px 56px" }}>
             Criar Conta Grátis Agora
           </button>
+          <p className="reveal" style={{ color: COLORS.gray, fontSize: 13, marginTop: 16 }}>
+            Sem cartão de crédito · Cancele quando quiser
+          </p>
         </div>
       </section>
 
       {/* FOOTER */}
       <footer style={{
         borderTop: `1px solid rgba(201,168,76,0.15)`,
-        padding: "40px",
+        padding: "40px 48px",
         display: "flex", justifyContent: "space-between", alignItems: "center",
         flexWrap: "wrap", gap: 20,
       }}>
@@ -714,7 +1283,7 @@ function LandingPage({ onLogin, onRegister }) {
         </div>
         <div style={{ display: "flex", gap: 24 }}>
           {["Privacidade", "Termos", "Contato"].map(item => (
-            <span key={item} style={{ color: COLORS.gray, fontSize: 13, cursor: "pointer" }}
+            <span key={item} style={{ color: COLORS.gray, fontSize: 13, cursor: "pointer", transition: "color 0.2s" }}
               onMouseEnter={e => e.target.style.color = COLORS.gold}
               onMouseLeave={e => e.target.style.color = COLORS.gray}>
               {item}
@@ -726,385 +1295,7 @@ function LandingPage({ onLogin, onRegister }) {
   );
 }
 
-// ═══════════════════════════════════════════════
-// AUTH
-// ═══════════════════════════════════════════════
-
-function AuthPage({ mode, onSuccess, onSwitch }) {
-  const [form, setForm] = useState({ name: "", company: "", email: "", password: "" });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const handle = async () => {
-    setLoading(true); setError("");
-    try {
-      const endpoint = mode === "login" ? "/auth/login" : "/auth/register";
-      const body = mode === "login" ? { email: form.email, password: form.password } : form;
-      const res = await fetch(`${BACKEND_URL}${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || data.message || "Erro");
-      localStorage.setItem("arcane_token", data.access_token);
-      localStorage.setItem("arcane_user", JSON.stringify(data.user));
-      onSuccess(data.user);
-    } catch (e) { setError(e.message); }
-    setLoading(false);
-  };
-
-  return (
-    <div style={{
-      minHeight: "100vh", background: COLORS.navy,
-      display: "flex", alignItems: "center", justifyContent: "center",
-      padding: 24, position: "relative",
-    }}>
-      <div style={{
-        position: "absolute", inset: 0, opacity: 0.03,
-        backgroundImage: `linear-gradient(${COLORS.gold} 1px, transparent 1px), linear-gradient(90deg, ${COLORS.gold} 1px, transparent 1px)`,
-        backgroundSize: "60px 60px",
-      }} />
-      <div style={{
-        background: COLORS.navyLight, border: `1px solid rgba(201,168,76,0.2)`,
-        borderRadius: 12, padding: "48px 40px", width: "100%", maxWidth: 440,
-        position: "relative", animation: "fadeUp 0.5s ease",
-      }}>
-        <div style={{ marginBottom: 32 }}>
-          <Logo size={20} />
-        </div>
-        <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 32, fontWeight: 300, marginBottom: 8 }}>
-          {mode === "login" ? "Bem-vindo de volta" : "Criar sua conta"}
-        </h2>
-        <p style={{ color: COLORS.gray, fontSize: 14, marginBottom: 32 }}>
-          {mode === "login" ? "Entre para continuar no Arcane" : "Comece grátis, sem cartão de crédito"}
-        </p>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {mode === "register" && (
-            <>
-              <input placeholder="Seu nome" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
-              <input placeholder="Nome da empresa" value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} />
-            </>
-          )}
-          <input placeholder="E-mail" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
-          <input placeholder="Senha" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })}
-            onKeyDown={e => e.key === "Enter" && handle()} />
-        </div>
-
-        {error && <div style={{ color: "#ff6b6b", fontSize: 13, marginTop: 12, padding: "10px 14px", background: "rgba(255,107,107,0.1)", borderRadius: 6 }}>{error}</div>}
-
-        <button className="btn-gold" onClick={handle} disabled={loading}
-          style={{ width: "100%", marginTop: 24, padding: 16, fontSize: 15, opacity: loading ? 0.7 : 1 }}>
-          {loading ? "Aguarde..." : mode === "login" ? "Entrar" : "Criar Conta Grátis"}
-        </button>
-
-        <div style={{ textAlign: "center", marginTop: 24, fontSize: 14, color: COLORS.gray }}>
-          {mode === "login" ? "Não tem conta?" : "Já tem conta?"}{" "}
-          <span style={{ color: COLORS.gold, cursor: "pointer" }} onClick={onSwitch}>
-            {mode === "login" ? "Criar agora" : "Entrar"}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════
-// DASHBOARD APP
-// ═══════════════════════════════════════════════
-
-async function callAI(toolId, userInput) {
-  const token = localStorage.getItem("arcane_token");
-  const res = await fetch(`${BACKEND_URL}/ai/generate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ tool: toolId, input: userInput }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Erro na geração");
-  return data.output;
-}
-
-function AppDashboard({ user, onLogout }) {
-  const [activeModule, setActiveModule] = useState(null);
-  const [activeTool, setActiveTool] = useState(null);
-  const [view, setView] = useState("dashboard");
-  const [input, setInput] = useState("");
-  const [result, setResult] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [history, setHistory] = useState([]);
-  const [usage, setUsage] = useState({ current: 0, limit: 500 });
-  const [toast, setToast] = useState(null);
-
-  const showToast = useCallback((msg) => { setToast(msg); }, []);
-
-  useEffect(() => {
-    const token = localStorage.getItem("arcane_token");
-    if (!token) return;
-    fetch(`${BACKEND_URL}/billing/usage`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json()).then(d => { if (d.current !== undefined) setUsage(d); }).catch(() => {});
-    fetch(`${BACKEND_URL}/ai/history?per_page=20`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json()).then(d => { if (d.history) setHistory(d.history); }).catch(() => {});
-  }, []);
-
-  const generate = async () => {
-    if (!input.trim() || !activeTool) return;
-    setLoading(true); setResult("");
-    try {
-      const text = await callAI(activeTool.id, input);
-      setResult(text);
-      setUsage(u => ({ ...u, current: u.current + 1 }));
-      setHistory(h => [{ tool_name: activeTool.name, input: input.slice(0, 60), output: text, created_at: new Date().toISOString() }, ...h]);
-      showToast("Conteúdo gerado com sucesso!");
-    } catch (e) { setResult(`Erro: ${e.message}`); }
-    setLoading(false);
-  };
-
-  const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: "⊞" },
-    ...MODULES.map(m => ({ id: m.id, label: m.label, icon: m.icon, module: m })),
-    { id: "historico", label: "Histórico", icon: "◷" },
-    { id: "planos", label: "Planos", icon: "◈" },
-  ];
-
-  const usagePct = Math.min((usage.current / (usage.limit || 1)) * 100, 100);
-  const planLabel = user?.plan?.toUpperCase() || "FREE";
-
-  return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      {/* SIDEBAR */}
-      <div className="sidebar">
-        <div className="sidebar-logo">
-          <Logo size={18} />
-        </div>
-
-        <div style={{ flex: 1, overflowY: "auto" }}>
-          <div style={{ padding: "0 20px 8px", fontSize: 10, letterSpacing: 2, color: COLORS.gray, textTransform: "uppercase" }}>Módulos</div>
-          {navItems.filter(n => n.module).map(item => (
-            <div key={item.id} className={`nav-item ${view === item.id ? "active" : ""}`}
-              onClick={() => { setView(item.id); setActiveModule(item.module); setActiveTool(null); setResult(""); }}>
-              <span style={{ color: item.module.color }}>{item.icon}</span>
-              {item.label}
-            </div>
-          ))}
-
-          <div style={{ height: 1, background: "rgba(201,168,76,0.1)", margin: "16px 20px" }} />
-          <div style={{ padding: "0 20px 8px", fontSize: 10, letterSpacing: 2, color: COLORS.gray, textTransform: "uppercase" }}>Geral</div>
-          {[{ id: "dashboard", label: "Dashboard", icon: "⊞" }, { id: "historico", label: "Histórico", icon: "◷" }, { id: "planos", label: "Planos", icon: "◈" }].map(item => (
-            <div key={item.id} className={`nav-item ${view === item.id ? "active" : ""}`}
-              onClick={() => { setView(item.id); setActiveModule(null); setActiveTool(null); }}>
-              <span>{item.icon}</span>
-              {item.label}
-            </div>
-          ))}
-        </div>
-
-        {/* Usage */}
-        <div style={{ padding: "20px 24px", borderTop: `1px solid rgba(201,168,76,0.15)` }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: COLORS.gray, marginBottom: 6 }}>
-            <span>Uso este mês</span>
-            <span style={{ color: COLORS.gold }}>{usage.current}/{usage.limit}</span>
-          </div>
-          <div className="usage-bar">
-            <div className="usage-fill" style={{ width: `${usagePct}%` }} />
-          </div>
-          <div style={{ marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 500 }}>{user?.name || "Usuário"}</div>
-              <div style={{ fontSize: 11, color: COLORS.gold, letterSpacing: 1 }}>{planLabel}</div>
-            </div>
-            <button onClick={onLogout} style={{ background: "none", color: COLORS.gray, fontSize: 18, padding: 4 }}
-              onMouseEnter={e => e.target.style.color = COLORS.gold}
-              onMouseLeave={e => e.target.style.color = COLORS.gray}>↗</button>
-          </div>
-        </div>
-      </div>
-
-      {/* MAIN */}
-      <div className="main-content">
-        <div className="topbar">
-          <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 20, fontWeight: 300 }}>
-            {view === "dashboard" ? "Dashboard" : view === "historico" ? "Histórico" : view === "planos" ? "Planos" : activeModule?.label}
-            {activeTool && <span style={{ color: COLORS.gold }}> / {activeTool.name}</span>}
-          </div>
-          <div style={{
-            background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldDark})`,
-            color: COLORS.navy, fontSize: 11, fontWeight: 700,
-            padding: "4px 12px", borderRadius: 20, letterSpacing: 1,
-          }}>{planLabel}</div>
-        </div>
-
-        <div style={{ padding: 32 }}>
-          {/* DASHBOARD */}
-          {view === "dashboard" && (
-            <div>
-              <div style={{ marginBottom: 40 }}>
-                <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 32, fontWeight: 300, marginBottom: 8 }}>
-                  Olá, <span style={{ color: COLORS.gold }}>{user?.name?.split(" ")[0]}</span>
-                </h2>
-                <p style={{ color: COLORS.gray }}>O que vamos criar hoje?</p>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20 }}>
-                {MODULES.map(mod => (
-                  <div key={mod.id} className="tool-card"
-                    onClick={() => { setView(mod.id); setActiveModule(mod); }}>
-                    <div style={{ fontSize: 36, marginBottom: 16, color: mod.color }}>{mod.icon}</div>
-                    <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 22, marginBottom: 8 }}>{mod.label}</div>
-                    <div style={{ width: 28, height: 1, background: mod.color, marginBottom: 12 }} />
-                    <div style={{ color: COLORS.gray, fontSize: 13 }}>{mod.tools.length} ferramentas disponíveis</div>
-                  </div>
-                ))}
-              </div>
-
-              {history.length > 0 && (
-                <div style={{ marginTop: 48 }}>
-                  <h3 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 22, fontWeight: 300, marginBottom: 20 }}>Gerações recentes</h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    {history.slice(0, 4).map((h, i) => (
-                      <div key={i} style={{
-                        background: "rgba(255,255,255,0.02)", border: `1px solid rgba(201,168,76,0.1)`,
-                        borderRadius: 6, padding: "14px 20px",
-                        display: "flex", justifyContent: "space-between", alignItems: "center",
-                      }}>
-                        <div>
-                          <span style={{ color: COLORS.gold, fontSize: 13, fontWeight: 500 }}>{h.tool_name}</span>
-                          <span style={{ color: COLORS.gray, fontSize: 13, marginLeft: 12 }}>{h.input}</span>
-                        </div>
-                        <span style={{ color: COLORS.gray, fontSize: 12 }}>{new Date(h.created_at).toLocaleDateString("pt-BR")}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* MODULE VIEW */}
-          {activeModule && view === activeModule.id && !activeTool && (
-            <div>
-              <p style={{ color: COLORS.gray, marginBottom: 32 }}>Selecione uma ferramenta para começar</p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
-                {activeModule.tools.map(tool => (
-                  <div key={tool.id} className="tool-card"
-                    onClick={() => { setActiveTool(tool); setResult(""); setInput(""); }}>
-                    <div style={{ color: activeModule.color, fontSize: 24, marginBottom: 12 }}>◈</div>
-                    <div style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>{tool.name}</div>
-                    <div style={{ color: COLORS.gray, fontSize: 13 }}>{tool.desc}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TOOL VIEW */}
-          {activeTool && (
-            <div style={{ maxWidth: 800 }}>
-              <button onClick={() => { setActiveTool(null); setResult(""); }}
-                style={{ background: "none", color: COLORS.gray, fontSize: 14, marginBottom: 24, display: "flex", alignItems: "center", gap: 8 }}>
-                ← Voltar
-              </button>
-              <p style={{ color: COLORS.gray, marginBottom: 20 }}>{activeTool.desc}</p>
-              <textarea
-                placeholder={`Descreva o que você precisa para ${activeTool.name.toLowerCase()}...`}
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                rows={5}
-                style={{ resize: "vertical", marginBottom: 16 }}
-              />
-              <button className="btn-gold" onClick={generate} disabled={loading || !input.trim()}
-                style={{ opacity: loading || !input.trim() ? 0.6 : 1 }}>
-                {loading ? "Gerando..." : "Gerar com IA"}
-              </button>
-
-              {(result || loading) && (
-                <div style={{ marginTop: 32 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                    <span style={{ color: COLORS.gold, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: loading ? COLORS.gold : "#4caf50", display: "inline-block", animation: loading ? "pulse 1s infinite" : "none" }} />
-                      {loading ? "Gerando..." : "Resultado"}
-                    </span>
-                    {result && !loading && (
-                      <button className="btn-outline" onClick={() => { navigator.clipboard.writeText(result); showToast("Copiado!"); }}
-                        style={{ padding: "6px 16px", fontSize: 12 }}>Copiar</button>
-                    )}
-                  </div>
-                  <div className="result-box">{loading ? "Aguarde..." : result}</div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* HISTORY */}
-          {view === "historico" && (
-            <div>
-              <p style={{ color: COLORS.gray, marginBottom: 32 }}>Todas as suas gerações anteriores</p>
-              {history.length === 0 ? (
-                <div style={{ textAlign: "center", color: COLORS.gray, padding: 60 }}>Nenhuma geração ainda</div>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  {history.map((h, i) => (
-                    <div key={i} className="card">
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                        <span style={{ color: COLORS.gold, fontSize: 13 }}>{h.tool_name}</span>
-                        <span style={{ color: COLORS.gray, fontSize: 12 }}>{new Date(h.created_at).toLocaleString("pt-BR")}</span>
-                      </div>
-                      <div style={{ color: COLORS.gray, fontSize: 13, marginBottom: 12 }}>{h.input}</div>
-                      <div style={{ color: COLORS.grayLight, fontSize: 13, lineHeight: 1.7 }}>{h.output?.slice(0, 200)}...</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* PLANS */}
-          {view === "planos" && (
-            <div>
-              <p style={{ color: COLORS.gray, marginBottom: 40 }}>Escolha o plano ideal para o seu negócio</p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20 }}>
-                {PLANS.map(plan => (
-                  <div key={plan.id} style={{
-                    background: plan.highlight ? "rgba(201,168,76,0.08)" : "rgba(255,255,255,0.03)",
-                    border: `1px solid ${plan.highlight ? COLORS.gold : "rgba(201,168,76,0.15)"}`,
-                    borderRadius: 8, padding: 28, position: "relative",
-                  }}>
-                    {plan.highlight && (
-                      <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", background: COLORS.gold, color: COLORS.navy, fontSize: 10, fontWeight: 700, padding: "3px 12px", borderRadius: 20, whiteSpace: "nowrap" }}>RECOMENDADO</div>
-                    )}
-                    {user?.plan === plan.id && (
-                      <div style={{ position: "absolute", top: -10, right: 16, background: "#4caf50", color: "#fff", fontSize: 10, fontWeight: 700, padding: "3px 12px", borderRadius: 20 }}>ATUAL</div>
-                    )}
-                    <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 36, fontWeight: 300, color: plan.highlight ? COLORS.gold : COLORS.white }}>{plan.price}<span style={{ fontSize: 14, color: COLORS.gray }}>{plan.period}</span></div>
-                    <div style={{ fontSize: 16, fontWeight: 500, margin: "8px 0 16px" }}>{plan.name}</div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 24 }}>
-                      {plan.features.map((f, i) => (
-                        <div key={i} style={{ fontSize: 12, color: COLORS.gray, display: "flex", gap: 8 }}>
-                          <span style={{ color: COLORS.gold }}>✓</span>{f}
-                        </div>
-                      ))}
-                    </div>
-                    <button onClick={() => showToast("Em breve: integração com Stripe!")}
-                      style={{ width: "100%", padding: 12, background: plan.highlight ? `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldDark})` : "transparent", color: plan.highlight ? COLORS.navy : COLORS.gold, border: plan.highlight ? "none" : `1px solid ${COLORS.gold}`, borderRadius: 4, fontSize: 12, letterSpacing: 1, textTransform: "uppercase", fontWeight: 600 }}>
-                      {user?.plan === plan.id ? "Plano Atual" : "Escolher"}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════
-// APP ROOT
-// ═══════════════════════════════════════════════
-
+// ── APP ROOT ──────────────────────────────────────────────────────
 export default function App() {
   const [screen, setScreen] = useState("landing");
   const [user, setUser] = useState(null);
@@ -1115,13 +1306,13 @@ export default function App() {
     if (token && savedUser) {
       try { setUser(JSON.parse(savedUser)); setScreen("app"); } catch (e) {}
     }
-    const style = document.createElement("style");
-    style.textContent = globalStyles;
-    document.head.appendChild(style);
-    return () => document.head.removeChild(style);
   }, []);
 
-  const handleAuthSuccess = (u) => { setUser(u); setScreen("app"); };
+  const handleAuthSuccess = (userData) => {
+    setUser(userData);
+    setScreen("app");
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("arcane_token");
     localStorage.removeItem("arcane_user");
