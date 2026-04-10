@@ -1542,3 +1542,4 @@ export default function App() {
   if (screen === "register") return <AuthPage mode="register" onSuccess={handleAuthSuccess} onSwitch={() => setScreen("login")} />;
   return <LandingPage onLogin={() => setScreen("login")} onRegister={() => setScreen("register")} />;
 }
+ 
