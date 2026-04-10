@@ -492,7 +492,11 @@ function AppDashboard({ user, onLogout }) {
           <div style={{ fontSize:12, color:C.muted, marginBottom:4 }}>{remaining==="inf"?"Ilimitado":`${remaining} de ${limitCount} restantes`}</div>
           <div className="usage-bar"><div className="usage-fill" style={{ width:`${usagePct}%` }} /></div>
           {plan.id!=="unlimited"&&<div onClick={()=>navTo("upgrade")} style={{ marginTop:10, fontSize:11, color:C.accent, cursor:"pointer", letterSpacing:0.5 }}>↑ Fazer upgrade</div>}
-          <div onClick={onLogout} style={{ marginTop:8, fontSize:12, color:C.hint, cursor:"pointer" }} onMouseEnter={e=>e.target.style.color=C.text} onMouseLeave={e=>e.target.style.color=C.hint}>← Sair</div>
+          <div onClick={onLogout} style={{ marginTop:12, display:"flex", alignItems:"center", gap:8, padding:"10px 12px", borderRadius:8, cursor:"pointer", background:"rgba(239,68,68,0.06)", border:"1px solid rgba(239,68,68,0.15)", color:"#f87171", fontSize:12, fontWeight:500, transition:"all 0.2s" }}
+            onMouseEnter={e=>e.currentTarget.style.background="rgba(239,68,68,0.14)"}
+            onMouseLeave={e=>e.currentTarget.style.background="rgba(239,68,68,0.06)"}>
+            <span style={{fontSize:14}}>→</span> Sair da conta
+          </div>
         </div>
       </div>
 
