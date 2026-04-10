@@ -759,13 +759,13 @@ function AppDashboard({ user, onLogout }) {
   const plan = PLANS.find(p => p.id === (user.plan || "free")) || PLANS[0];
 
   useEffect(() => {
-    fetchUsage();
+    // fetchUsage();
   }, []);
 
   const fetchUsage = async () => {
     try {
       const token = localStorage.getItem("arcane_token");
-      const res = await fetch(BACKEND_URL + "/ai/usage", {
+      const res = await fetch(BACKEND_URL + "/ai/tools", {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -799,7 +799,7 @@ function AppDashboard({ user, onLogout }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erro ao gerar");
       setResult(data.result || data.content || "");
-      fetchUsage();
+      // fetchUsage();
     } catch (e) { setToast(e.message); }
     setLoading(false);
   };
