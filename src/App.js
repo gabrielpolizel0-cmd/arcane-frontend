@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+﻿import React, { useState, useEffect, useRef, useCallback } from "react";
 
 const MODE = "prod";
-const BACKEND_URL = "https://arcane-backend-production-d37b.up.railway.app/api";
+const BACKEND_URL = "https://web-production-ddbd9.up.railway.app/api";
 
 const COLORS = {
-  navy: "#0a0f1e",
-  navyLight: "#0d1528",
-  navyMid: "#111c35",
-  gold: "#c9a84c",
-  goldLight: "#e2c47a",
-  goldDark: "#a07830",
-  white: "#f0ece0",
-  gray: "#8892a4",
-  grayLight: "#c8d0dc",
+  navy: "#0A1628",
+  navyLight: "#0F1F3D",
+  navyMid: "#132038",
+  gold: "#2563EB",
+  goldLight: "#60A5FA",
+  goldDark: "#1D4ED8",
+  white: "#F1F5F9",
+  gray: "#64748B",
+  grayLight: "#CBD5E1",
 };
 
 const globalStyles = `
@@ -397,7 +397,7 @@ const globalStyles = `
   }
 `;
 
-// ── SCROLL REVEAL HOOK ──────────────────────────────────────────
+// â”€â”€ SCROLL REVEAL HOOK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function useScrollReveal() {
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -416,7 +416,7 @@ function useScrollReveal() {
   });
 }
 
-// ── LOGO ────────────────────────────────────────────────────────
+// â”€â”€ LOGO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Logo({ size = 22 }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -427,7 +427,7 @@ function Logo({ size = 22 }) {
         display: "flex", alignItems: "center", justifyContent: "center",
         fontSize: size * 0.6, color: COLORS.navy, fontWeight: 700,
         boxShadow: `0 4px 15px rgba(201,168,76,0.4)`,
-      }}>◆</div>
+      }}>â—†</div>
       <span style={{
         fontFamily: "Cormorant Garamond, serif",
         fontSize: size, fontWeight: 600, letterSpacing: 3,
@@ -437,7 +437,7 @@ function Logo({ size = 22 }) {
   );
 }
 
-// ── TOAST ───────────────────────────────────────────────────────
+// â”€â”€ TOAST â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Toast({ message, onClose }) {
   useEffect(() => {
     const t = setTimeout(onClose, 3000);
@@ -446,86 +446,86 @@ function Toast({ message, onClose }) {
   return <div className="toast">{message}</div>;
 }
 
-// ── MODULES & DATA ───────────────────────────────────────────────
+// â”€â”€ MODULES & DATA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const MODULES = [
   {
-    id: "documentos", icon: "◈", label: "Documentos", color: COLORS.gold,
+    id: "documentos", icon: "â—ˆ", label: "Documentos", color: COLORS.gold,
     tools: [
-      { id: "contrato", name: "Gerar Contrato", desc: "Contratos profissionais personalizados", prompt: "Você é especialista em direito empresarial brasileiro. Gere um contrato profissional e completo baseado nas informações fornecidas. Use linguagem jurídica adequada." },
-      { id: "proposta", name: "Proposta Comercial", desc: "Propostas persuasivas e profissionais", prompt: "Você é especialista em vendas B2B. Crie uma proposta comercial persuasiva, estruturada e profissional." },
-      { id: "relatorio", name: "Relatório Executivo", desc: "Relatórios claros e impactantes", prompt: "Você é especialista em comunicação executiva. Crie um relatório executivo claro, estruturado e impactante." },
-      { id: "email_corp", name: "E-mail Corporativo", desc: "Comunicações formais e eficazes", prompt: "Você é especialista em comunicação corporativa. Escreva um e-mail profissional, claro e persuasivo." },
+      { id: "contrato", name: "Gerar Contrato", desc: "Contratos profissionais personalizados", prompt: "VocÃª Ã© especialista em direito empresarial brasileiro. Gere um contrato profissional e completo baseado nas informaÃ§Ãµes fornecidas. Use linguagem jurÃ­dica adequada." },
+      { id: "proposta", name: "Proposta Comercial", desc: "Propostas persuasivas e profissionais", prompt: "VocÃª Ã© especialista em vendas B2B. Crie uma proposta comercial persuasiva, estruturada e profissional." },
+      { id: "relatorio", name: "RelatÃ³rio Executivo", desc: "RelatÃ³rios claros e impactantes", prompt: "VocÃª Ã© especialista em comunicaÃ§Ã£o executiva. Crie um relatÃ³rio executivo claro, estruturado e impactante." },
+      { id: "email_corp", name: "E-mail Corporativo", desc: "ComunicaÃ§Ãµes formais e eficazes", prompt: "VocÃª Ã© especialista em comunicaÃ§Ã£o corporativa. Escreva um e-mail profissional, claro e persuasivo." },
     ]
   },
   {
-    id: "dados", icon: "◇", label: "Dados", color: "#6bb5ff",
+    id: "dados", icon: "â—‡", label: "Dados", color: "#6bb5ff",
     tools: [
-      { id: "analise", name: "Análise de Dados", desc: "Insights estratégicos dos seus dados", prompt: "Você é analista de dados sênior. Analise os dados fornecidos e gere insights estratégicos com linguagem clara para gestores." },
-      { id: "query", name: "Gerar Query SQL", desc: "Consultas SQL otimizadas", prompt: "Você é especialista em banco de dados. Gere uma query SQL otimizada e bem comentada." },
-      { id: "previsao", name: "Previsão e Tendências", desc: "Antecipe cenários do seu negócio", prompt: "Você é especialista em business intelligence. Analise e projete tendências com base nos dados fornecidos." },
-      { id: "kpis", name: "Definir KPIs", desc: "Métricas certas para seu negócio", prompt: "Você é especialista em gestão por indicadores. Sugira KPIs relevantes e como mensurá-los." },
+      { id: "analise", name: "AnÃ¡lise de Dados", desc: "Insights estratÃ©gicos dos seus dados", prompt: "VocÃª Ã© analista de dados sÃªnior. Analise os dados fornecidos e gere insights estratÃ©gicos com linguagem clara para gestores." },
+      { id: "query", name: "Gerar Query SQL", desc: "Consultas SQL otimizadas", prompt: "VocÃª Ã© especialista em banco de dados. Gere uma query SQL otimizada e bem comentada." },
+      { id: "previsao", name: "PrevisÃ£o e TendÃªncias", desc: "Antecipe cenÃ¡rios do seu negÃ³cio", prompt: "VocÃª Ã© especialista em business intelligence. Analise e projete tendÃªncias com base nos dados fornecidos." },
+      { id: "kpis", name: "Definir KPIs", desc: "MÃ©tricas certas para seu negÃ³cio", prompt: "VocÃª Ã© especialista em gestÃ£o por indicadores. Sugira KPIs relevantes e como mensurÃ¡-los." },
     ]
   },
   {
-    id: "produtividade", icon: "◉", label: "Produtividade", color: "#7ed89a",
+    id: "produtividade", icon: "â—‰", label: "Produtividade", color: "#7ed89a",
     tools: [
-      { id: "ata", name: "Ata de Reunião", desc: "Documente decisões com clareza", prompt: "Você é especialista em comunicação empresarial. Gere uma ata de reunião profissional e estruturada." },
-      { id: "resumo", name: "Resumir Documento", desc: "Sínteses executivas precisas", prompt: "Você é especialista em síntese de informações. Resuma o conteúdo de forma clara, destacando pontos-chave." },
-      { id: "onboarding", name: "Plano de Onboarding", desc: "Integre novos colaboradores", prompt: "Você é especialista em gestão de pessoas. Crie um plano de onboarding estruturado e acolhedor." },
-      { id: "base_conhecimento", name: "Base de Conhecimento", desc: "Organize o saber da empresa", prompt: "Você é especialista em gestão do conhecimento. Estruture as informações em uma base de conhecimento clara." },
+      { id: "ata", name: "Ata de ReuniÃ£o", desc: "Documente decisÃµes com clareza", prompt: "VocÃª Ã© especialista em comunicaÃ§Ã£o empresarial. Gere uma ata de reuniÃ£o profissional e estruturada." },
+      { id: "resumo", name: "Resumir Documento", desc: "SÃ­nteses executivas precisas", prompt: "VocÃª Ã© especialista em sÃ­ntese de informaÃ§Ãµes. Resuma o conteÃºdo de forma clara, destacando pontos-chave." },
+      { id: "onboarding", name: "Plano de Onboarding", desc: "Integre novos colaboradores", prompt: "VocÃª Ã© especialista em gestÃ£o de pessoas. Crie um plano de onboarding estruturado e acolhedor." },
+      { id: "base_conhecimento", name: "Base de Conhecimento", desc: "Organize o saber da empresa", prompt: "VocÃª Ã© especialista em gestÃ£o do conhecimento. Estruture as informaÃ§Ãµes em uma base de conhecimento clara." },
     ]
   },
   {
-    id: "conteudo", icon: "◆", label: "Conteúdo", color: "#c78fff",
+    id: "conteudo", icon: "â—†", label: "ConteÃºdo", color: "#c78fff",
     tools: [
-      { id: "post_social", name: "Post para Redes Sociais", desc: "Conteúdo que engaja e converte", prompt: "Você é especialista em marketing digital. Crie posts envolventes e estratégicos para redes sociais." },
-      { id: "blog", name: "Artigo para Blog", desc: "Conteúdo que posiciona sua marca", prompt: "Você é especialista em content marketing e SEO. Escreva um artigo completo, envolvente e otimizado." },
-      { id: "email_mkt", name: "E-mail Marketing", desc: "Campanhas que geram resultados", prompt: "Você é especialista em e-mail marketing. Escreva um e-mail de campanha persuasivo e com alto potencial de conversão." },
-      { id: "descricao", name: "Descrição de Produto", desc: "Textos que vendem mais", prompt: "Você é especialista em copywriting. Escreva uma descrição de produto irresistível que destaca benefícios e gera desejo." },
+      { id: "post_social", name: "Post para Redes Sociais", desc: "ConteÃºdo que engaja e converte", prompt: "VocÃª Ã© especialista em marketing digital. Crie posts envolventes e estratÃ©gicos para redes sociais." },
+      { id: "blog", name: "Artigo para Blog", desc: "ConteÃºdo que posiciona sua marca", prompt: "VocÃª Ã© especialista em content marketing e SEO. Escreva um artigo completo, envolvente e otimizado." },
+      { id: "email_mkt", name: "E-mail Marketing", desc: "Campanhas que geram resultados", prompt: "VocÃª Ã© especialista em e-mail marketing. Escreva um e-mail de campanha persuasivo e com alto potencial de conversÃ£o." },
+      { id: "descricao", name: "DescriÃ§Ã£o de Produto", desc: "Textos que vendem mais", prompt: "VocÃª Ã© especialista em copywriting. Escreva uma descriÃ§Ã£o de produto irresistÃ­vel que destaca benefÃ­cios e gera desejo." },
     ]
   },
 ];
 
-// PLANO FREE = 5 gerações, corrigido aqui no frontend
+// PLANO FREE = 5 geraÃ§Ãµes, corrigido aqui no frontend
 const PLANS = [
-  { id: "free", name: "Free", price: "R$ 0", period: "", gens: "5 gerações/mês", gensLimit: 5, users: "1 usuário", highlight: false, features: ["4 módulos completos", "Acesso básico", "Suporte por e-mail"] },
-  { id: "starter", name: "Starter", price: "R$ 97", period: "/mês", gens: "150 gerações/mês", gensLimit: 150, users: "3 usuários", highlight: false, features: ["Tudo do Free", "3 usuários", "Suporte prioritário", "Histórico 30 dias"] },
-  { id: "business", name: "Business", price: "R$ 297", period: "/mês", gens: "500 gerações/mês", gensLimit: 500, users: "15 usuários", highlight: true, features: ["Tudo do Starter", "15 usuários", "Acesso à API", "Histórico completo", "Suporte dedicado"] },
-  { id: "unlimited", name: "Unlimited", price: "R$ 897", period: "/mês", gens: "Gerações ilimitadas", gensLimit: 99999, users: "Usuários ilimitados", highlight: false, features: ["Tudo do Business", "Usuários ilimitados", "IA personalizada", "SLA dedicado", "Integração customizada", "Treinamento da equipe"] },
+  { id: "free", name: "Free", price: "R$ 0", period: "", gens: "5 geraÃ§Ãµes/mÃªs", gensLimit: 5, users: "1 usuÃ¡rio", highlight: false, features: ["4 mÃ³dulos completos", "Acesso bÃ¡sico", "Suporte por e-mail"] },
+  { id: "starter", name: "Starter", price: "R$ 97", period: "/mÃªs", gens: "150 geraÃ§Ãµes/mÃªs", gensLimit: 150, users: "3 usuÃ¡rios", highlight: false, features: ["Tudo do Free", "3 usuÃ¡rios", "Suporte prioritÃ¡rio", "HistÃ³rico 30 dias"] },
+  { id: "business", name: "Business", price: "R$ 297", period: "/mÃªs", gens: "500 geraÃ§Ãµes/mÃªs", gensLimit: 500, users: "15 usuÃ¡rios", highlight: true, features: ["Tudo do Starter", "15 usuÃ¡rios", "Acesso Ã  API", "HistÃ³rico completo", "Suporte dedicado"] },
+  { id: "unlimited", name: "Unlimited", price: "R$ 897", period: "/mÃªs", gens: "GeraÃ§Ãµes ilimitadas", gensLimit: 99999, users: "UsuÃ¡rios ilimitados", highlight: false, features: ["Tudo do Business", "UsuÃ¡rios ilimitados", "IA personalizada", "SLA dedicado", "IntegraÃ§Ã£o customizada", "Treinamento da equipe"] },
 ];
 
 const TESTIMONIALS = [
-  { name: "Fernanda Oliveira", role: "CEO, Construtora Horizonte", text: "O Arcane transformou nossa produção de contratos. O que levava 2 horas, agora fazemos em 5 minutos. Impressionante.", avatar: "F" },
-  { name: "Rafael Mendes", role: "Diretor Comercial, LogTech", text: "Nossas propostas ficaram muito mais profissionais. Fechamos 40% mais negócios no primeiro mês usando o Arcane.", avatar: "R" },
-  { name: "Camila Santos", role: "Gerente de Marketing, Viva Moda", text: "A qualidade do conteúdo gerado é surpreendente. Economizamos R$ 8.000/mês em agência de conteúdo.", avatar: "C" },
+  { name: "Fernanda Oliveira", role: "CEO, Construtora Horizonte", text: "O Arcane transformou nossa produÃ§Ã£o de contratos. O que levava 2 horas, agora fazemos em 5 minutos. Impressionante.", avatar: "F" },
+  { name: "Rafael Mendes", role: "Diretor Comercial, LogTech", text: "Nossas propostas ficaram muito mais profissionais. Fechamos 40% mais negÃ³cios no primeiro mÃªs usando o Arcane.", avatar: "R" },
+  { name: "Camila Santos", role: "Gerente de Marketing, Viva Moda", text: "A qualidade do conteÃºdo gerado Ã© surpreendente. Economizamos R$ 8.000/mÃªs em agÃªncia de conteÃºdo.", avatar: "C" },
 ];
 
 const FAQS = [
-  { q: "Preciso saber programar para usar o Arcane?", a: "Não! O Arcane foi desenvolvido para qualquer profissional. A interface é intuitiva e você começa a gerar resultados em minutos, sem nenhum conhecimento técnico." },
-  { q: "Os dados da minha empresa ficam seguros?", a: "Sim. Utilizamos criptografia de ponta a ponta e seus dados nunca são usados para treinar modelos de IA. Seguimos todas as diretrizes da LGPD." },
-  { q: "Posso cancelar a qualquer momento?", a: "Sim, sem taxas ou burocracia. Você pode cancelar sua assinatura quando quiser diretamente pelo painel." },
-  { q: "O plano Free tem limitações?", a: "O plano Free oferece 5 gerações por mês para você experimentar a plataforma. Para uso profissional, recomendamos o Starter ou Business." },
-  { q: "Como funciona o suporte?", a: "Planos pagos têm suporte via e-mail com resposta em até 24h. O plano Business inclui suporte prioritário e o Unlimited tem gerente de conta dedicado." },
+  { q: "Preciso saber programar para usar o Arcane?", a: "NÃ£o! O Arcane foi desenvolvido para qualquer profissional. A interface Ã© intuitiva e vocÃª comeÃ§a a gerar resultados em minutos, sem nenhum conhecimento tÃ©cnico." },
+  { q: "Os dados da minha empresa ficam seguros?", a: "Sim. Utilizamos criptografia de ponta a ponta e seus dados nunca sÃ£o usados para treinar modelos de IA. Seguimos todas as diretrizes da LGPD." },
+  { q: "Posso cancelar a qualquer momento?", a: "Sim, sem taxas ou burocracia. VocÃª pode cancelar sua assinatura quando quiser diretamente pelo painel." },
+  { q: "O plano Free tem limitaÃ§Ãµes?", a: "O plano Free oferece 5 geraÃ§Ãµes por mÃªs para vocÃª experimentar a plataforma. Para uso profissional, recomendamos o Starter ou Business." },
+  { q: "Como funciona o suporte?", a: "Planos pagos tÃªm suporte via e-mail com resposta em atÃ© 24h. O plano Business inclui suporte prioritÃ¡rio e o Unlimited tem gerente de conta dedicado." },
 ];
 
 const COMPARISON = [
-  { feature: "Gerações mensais", arcane: "Até ilimitado", chatgpt: "Limitado", concorrente: "Limitado" },
-  { feature: "Focado em empresas", arcane: "✓", chatgpt: "✗", concorrente: "Parcial" },
-  { feature: "Português nativo", arcane: "✓", chatgpt: "Parcial", concorrente: "✗" },
-  { feature: "Módulos especializados", arcane: "✓", chatgpt: "✗", concorrente: "✗" },
-  { feature: "Suporte dedicado", arcane: "✓", chatgpt: "✗", concorrente: "Parcial" },
-  { feature: "Conformidade LGPD", arcane: "✓", chatgpt: "✗", concorrente: "✗" },
-  { feature: "Preço acessível", arcane: "✓", chatgpt: "✗", concorrente: "Parcial" },
+  { feature: "GeraÃ§Ãµes mensais", arcane: "AtÃ© ilimitado", chatgpt: "Limitado", concorrente: "Limitado" },
+  { feature: "Focado em empresas", arcane: "âœ“", chatgpt: "âœ—", concorrente: "Parcial" },
+  { feature: "PortuguÃªs nativo", arcane: "âœ“", chatgpt: "Parcial", concorrente: "âœ—" },
+  { feature: "MÃ³dulos especializados", arcane: "âœ“", chatgpt: "âœ—", concorrente: "âœ—" },
+  { feature: "Suporte dedicado", arcane: "âœ“", chatgpt: "âœ—", concorrente: "Parcial" },
+  { feature: "Conformidade LGPD", arcane: "âœ“", chatgpt: "âœ—", concorrente: "âœ—" },
+  { feature: "PreÃ§o acessÃ­vel", arcane: "âœ“", chatgpt: "âœ—", concorrente: "Parcial" },
 ];
 
 const HOW_IT_WORKS_STEPS = [
-  { number: "01", title: "Crie sua conta", desc: "Cadastre-se gratuitamente em menos de 1 minuto. Sem cartão de crédito necessário.", icon: "◎" },
-  { number: "02", title: "Escolha a ferramenta", desc: "Selecione entre 16 ferramentas especializadas em 4 módulos de negócio.", icon: "◈" },
-  { number: "03", title: "Insira suas informações", desc: "Descreva o que você precisa. Quanto mais detalhes, melhor o resultado.", icon: "◇" },
-  { number: "04", title: "Receba o resultado", desc: "A IA gera seu conteúdo profissional em segundos. Copie, edite e use.", icon: "◆" },
+  { number: "01", title: "Crie sua conta", desc: "Cadastre-se gratuitamente em menos de 1 minuto. Sem cartÃ£o de crÃ©dito necessÃ¡rio.", icon: "â—Ž" },
+  { number: "02", title: "Escolha a ferramenta", desc: "Selecione entre 16 ferramentas especializadas em 4 mÃ³dulos de negÃ³cio.", icon: "â—ˆ" },
+  { number: "03", title: "Insira suas informaÃ§Ãµes", desc: "Descreva o que vocÃª precisa. Quanto mais detalhes, melhor o resultado.", icon: "â—‡" },
+  { number: "04", title: "Receba o resultado", desc: "A IA gera seu conteÃºdo profissional em segundos. Copie, edite e use.", icon: "â—†" },
 ];
 
-// ── PARTICLES BACKGROUND ─────────────────────────────────────────
+// â”€â”€ PARTICLES BACKGROUND â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Particles() {
   const particles = Array.from({ length: 20 }, (_, i) => ({
     id: i,
@@ -552,14 +552,14 @@ function Particles() {
   );
 }
 
-// ── MERCADO PAGO LINKS (substitua pelos seus links reais do MP) ──
+// â”€â”€ MERCADO PAGO LINKS (substitua pelos seus links reais do MP) â”€â”€
 const MP_LINKS = {
   starter: "https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=SEU_ID_STARTER",
   business: "https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=SEU_ID_BUSINESS",
   unlimited: "https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=SEU_ID_UNLIMITED",
 };
 
-// ── AUTH PAGE ────────────────────────────────────────────────────
+// â”€â”€ AUTH PAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AuthPage({ mode, onSuccess, onSwitch }) {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
@@ -593,7 +593,7 @@ function AuthPage({ mode, onSuccess, onSwitch }) {
     }}>
       <style>{globalStyles}</style>
 
-      {/* Left panel — branding */}
+      {/* Left panel â€” branding */}
       <div style={{
         width: "45%", background: `linear-gradient(160deg, ${COLORS.navyMid} 0%, ${COLORS.navy} 100%)`,
         borderRight: `1px solid rgba(201,168,76,0.12)`,
@@ -615,18 +615,18 @@ function AuthPage({ mode, onSuccess, onSwitch }) {
           <div style={{ marginTop: 64 }}>
             <div className="tag" style={{ marginBottom: 24 }}>Plataforma de IA</div>
             <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 40, fontWeight: 300, lineHeight: 1.2, marginBottom: 24 }}>
-              Conteúdo profissional<br />
+              ConteÃºdo profissional<br />
               em <em style={{ color: COLORS.gold }}>segundos</em>
             </h2>
             <p style={{ color: COLORS.gray, fontSize: 15, lineHeight: 1.8, marginBottom: 48 }}>
-              16 ferramentas de IA especializadas para empresas brasileiras. Documentos, dados, conteúdo e muito mais.
+              16 ferramentas de IA especializadas para empresas brasileiras. Documentos, dados, conteÃºdo e muito mais.
             </p>
 
             {/* Mini features */}
             {[
-              { icon: "◈", text: "16 ferramentas especializadas" },
-              { icon: "◇", text: "Resultados em menos de 30 segundos" },
-              { icon: "◆", text: "100% em português, focado no Brasil" },
+              { icon: "â—ˆ", text: "16 ferramentas especializadas" },
+              { icon: "â—‡", text: "Resultados em menos de 30 segundos" },
+              { icon: "â—†", text: "100% em portuguÃªs, focado no Brasil" },
             ].map((f, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
                 <span style={{ color: COLORS.gold, fontSize: 16 }}>{f.icon}</span>
@@ -637,12 +637,12 @@ function AuthPage({ mode, onSuccess, onSwitch }) {
 
           <div style={{ marginTop: 64, paddingTop: 32, borderTop: "1px solid rgba(201,168,76,0.1)" }}>
             <div style={{ color: COLORS.gray, fontSize: 12, marginBottom: 12 }}>PLANO GRATUITO INCLUI</div>
-            <div style={{ color: COLORS.grayLight, fontSize: 14 }}>✓ 5 gerações por mês &nbsp;·&nbsp; ✓ Todos os módulos &nbsp;·&nbsp; ✓ Sem cartão</div>
+            <div style={{ color: COLORS.grayLight, fontSize: 14 }}>âœ“ 5 geraÃ§Ãµes por mÃªs &nbsp;Â·&nbsp; âœ“ Todos os mÃ³dulos &nbsp;Â·&nbsp; âœ“ Sem cartÃ£o</div>
           </div>
         </div>
       </div>
 
-      {/* Right panel — form */}
+      {/* Right panel â€” form */}
       <div style={{
         flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
         padding: "48px 64px",
@@ -653,7 +653,7 @@ function AuthPage({ mode, onSuccess, onSwitch }) {
               {mode === "login" ? "Bem-vindo de volta" : "Criar sua conta"}
             </h3>
             <p style={{ color: COLORS.gray, fontSize: 14 }}>
-              {mode === "login" ? "Entre para continuar usando o Arcane" : "Comece gratuitamente, sem cartão de crédito"}
+              {mode === "login" ? "Entre para continuar usando o Arcane" : "Comece gratuitamente, sem cartÃ£o de crÃ©dito"}
             </p>
           </div>
 
@@ -691,7 +691,7 @@ function AuthPage({ mode, onSuccess, onSwitch }) {
               </label>
               <input
                 type="password"
-                placeholder="Mínimo 6 caracteres"
+                placeholder="MÃ­nimo 6 caracteres"
                 value={form.password}
                 onChange={e => setForm({ ...form, password: e.target.value })}
                 onKeyDown={e => e.key === "Enter" && handle()}
@@ -705,7 +705,7 @@ function AuthPage({ mode, onSuccess, onSwitch }) {
                 borderRadius: 6, padding: "12px 16px", fontSize: 13, color: "#ff9090",
                 display: "flex", alignItems: "center", gap: 8,
               }}>
-                ⚠ {error}
+                âš  {error}
               </div>
             )}
 
@@ -715,28 +715,28 @@ function AuthPage({ mode, onSuccess, onSwitch }) {
               disabled={loading}
               style={{ width: "100%", fontSize: 14, padding: "16px", marginTop: 4, opacity: loading ? 0.7 : 1 }}
             >
-              {loading ? "Aguarde..." : mode === "login" ? "Entrar na plataforma" : "Criar conta grátis"}
+              {loading ? "Aguarde..." : mode === "login" ? "Entrar na plataforma" : "Criar conta grÃ¡tis"}
             </button>
 
             {mode === "register" && (
               <p style={{ fontSize: 12, color: COLORS.gray, textAlign: "center", lineHeight: 1.6 }}>
-                Ao criar uma conta você concorda com nossos{" "}
+                Ao criar uma conta vocÃª concorda com nossos{" "}
                 <span style={{ color: COLORS.gold, cursor: "pointer" }}>Termos de Uso</span>{" "}
                 e{" "}
-                <span style={{ color: COLORS.gold, cursor: "pointer" }}>Política de Privacidade</span>.
+                <span style={{ color: COLORS.gold, cursor: "pointer" }}>PolÃ­tica de Privacidade</span>.
               </p>
             )}
           </div>
 
           <div style={{ textAlign: "center", marginTop: 32, paddingTop: 32, borderTop: "1px solid rgba(201,168,76,0.1)" }}>
             <span style={{ color: COLORS.gray, fontSize: 14 }}>
-              {mode === "login" ? "Não tem conta? " : "Já tem conta? "}
+              {mode === "login" ? "NÃ£o tem conta? " : "JÃ¡ tem conta? "}
             </span>
             <span
               onClick={onSwitch}
               style={{ color: COLORS.gold, cursor: "pointer", fontSize: 14, fontWeight: 500 }}
             >
-              {mode === "login" ? "Criar gratuitamente →" : "Entrar →"}
+              {mode === "login" ? "Criar gratuitamente â†’" : "Entrar â†’"}
             </span>
           </div>
         </div>
@@ -745,7 +745,7 @@ function AuthPage({ mode, onSuccess, onSwitch }) {
   );
 }
 
-// ── APP DASHBOARD ────────────────────────────────────────────────
+// â”€â”€ APP DASHBOARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AppDashboard({ user, onLogout }) {
   const [activeModule, setActiveModule] = useState(null);
   const [activeTool, setActiveTool] = useState(null);
@@ -775,17 +775,17 @@ function AppDashboard({ user, onLogout }) {
     } catch (e) {}
   };
 
-  // Force frontend plan limits — ignore whatever the backend says for limit
-  // Backend may return: used, generations_used, count — try all
+  // Force frontend plan limits â€” ignore whatever the backend says for limit
+  // Backend may return: used, generations_used, count â€” try all
   const usedCount = usageData?.used ?? usageData?.generations_used ?? usageData?.count ?? 0;
   const limitCount = plan.gensLimit; // Always use frontend value (5 for free)
   const usagePct = limitCount >= 99999 ? 0 : Math.min((usedCount / limitCount) * 100, 100);
-  const remaining = limitCount >= 99999 ? "∞" : Math.max(limitCount - usedCount, 0);
+  const remaining = limitCount >= 99999 ? "âˆž" : Math.max(limitCount - usedCount, 0);
 
   const generate = async () => {
     if (!activeTool || !input.trim()) return;
-    if (remaining !== "∞" && remaining <= 0) {
-      setToast("Limite de gerações atingido. Faça upgrade do plano!");
+    if (remaining !== "âˆž" && remaining <= 0) {
+      setToast("Limite de geraÃ§Ãµes atingido. FaÃ§a upgrade do plano!");
       return;
     }
     setLoading(true); setResult("");
@@ -798,7 +798,7 @@ function AppDashboard({ user, onLogout }) {
       });
       const data = await res.json();
       if (res.status === 422 || res.status === 401) { localStorage.removeItem("arcane_token"); localStorage.removeItem("arcane_user"); window.location.reload(); return; } if (!res.ok) throw new Error(data.error || "Erro ao gerar");
-      setResult(data.result || data.content || "");
+      setResult(data.output || data.result || data.content || "");
       // fetchUsage();
     } catch (e) { setToast(e.message); }
     setLoading(false);
@@ -806,7 +806,7 @@ function AppDashboard({ user, onLogout }) {
 
   const copyResult = () => {
     navigator.clipboard.writeText(result);
-    setToast("Copiado para a área de transferência!");
+    setToast("Copiado para a Ã¡rea de transferÃªncia!");
   };
 
   return (
@@ -820,7 +820,7 @@ function AppDashboard({ user, onLogout }) {
         </div>
 
         <div style={{ flex: 1, overflowY: "auto" }}>
-          <div style={{ padding: "8px 16px", fontSize: 10, color: COLORS.gray, letterSpacing: 2, textTransform: "uppercase", marginBottom: 4 }}>Módulos</div>
+          <div style={{ padding: "8px 16px", fontSize: 10, color: COLORS.gray, letterSpacing: 2, textTransform: "uppercase", marginBottom: 4 }}>MÃ³dulos</div>
           {MODULES.map(mod => (
             <div key={mod.id} className={`nav-item ${activeModule === mod.id ? "active" : ""}`}
               onClick={() => { setActiveModule(mod.id); setActiveTool(null); setResult(""); }}>
@@ -831,7 +831,7 @@ function AppDashboard({ user, onLogout }) {
           <div style={{ padding: "16px 16px 4px", fontSize: 10, color: COLORS.gray, letterSpacing: 2, textTransform: "uppercase", marginTop: 8 }}>Geral</div>
           <div className={`nav-item ${activeModule === null ? "active" : ""}`}
             onClick={() => { setActiveModule(null); setActiveTool(null); setResult(""); }}>
-            <span style={{ fontSize: 16 }}>⊞</span>
+            <span style={{ fontSize: 16 }}>âŠž</span>
             <span>Dashboard</span>
           </div>
         </div>
@@ -841,7 +841,7 @@ function AppDashboard({ user, onLogout }) {
             Plano {plan.name}
           </div>
           <div style={{ fontSize: 12, color: COLORS.grayLight, marginBottom: 6 }}>
-            {remaining === "∞" ? "Ilimitado" : `${remaining} de ${limitCount} restantes`}
+            {remaining === "âˆž" ? "Ilimitado" : `${remaining} de ${limitCount} restantes`}
           </div>
           <div className="usage-bar">
             <div className="usage-fill" style={{ width: `${usagePct}%` }} />
@@ -849,7 +849,7 @@ function AppDashboard({ user, onLogout }) {
           <div onClick={onLogout} style={{ marginTop: 20, fontSize: 13, color: COLORS.gray, cursor: "pointer" }}
             onMouseEnter={e => e.target.style.color = COLORS.white}
             onMouseLeave={e => e.target.style.color = COLORS.gray}>
-            ← Sair
+            â† Sair
           </div>
         </div>
       </div>
@@ -862,7 +862,7 @@ function AppDashboard({ user, onLogout }) {
               {activeModule ? currentModule?.label : "Dashboard"}
             </div>
             <div style={{ fontSize: 12, color: COLORS.gray }}>
-              {activeModule ? `${currentModule?.tools.length} ferramentas disponíveis` : "Bem-vindo ao Arcane"}
+              {activeModule ? `${currentModule?.tools.length} ferramentas disponÃ­veis` : "Bem-vindo ao Arcane"}
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -887,7 +887,7 @@ function AppDashboard({ user, onLogout }) {
             <>
               <div style={{ marginBottom: 36 }}>
                 <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 32, fontWeight: 300, marginBottom: 8 }}>
-                  Olá, <em style={{ color: COLORS.gold }}>{user.name || "bem-vindo"}</em>
+                  OlÃ¡, <em style={{ color: COLORS.gold }}>{user.name || "bem-vindo"}</em>
                 </h2>
                 <p style={{ color: COLORS.gray, fontSize: 14 }}>O que vamos criar hoje?</p>
               </div>
@@ -900,15 +900,15 @@ function AppDashboard({ user, onLogout }) {
               }}>
                 <div>
                   <div style={{ fontSize: 12, color: COLORS.gray, marginBottom: 6, letterSpacing: 1, textTransform: "uppercase" }}>
-                    Uso este mês — Plano {plan.name}
+                    Uso este mÃªs â€” Plano {plan.name}
                   </div>
                   <div style={{ fontSize: 22, fontFamily: "Cormorant Garamond, serif", color: COLORS.gold }}>
-                    {usedCount} <span style={{ fontSize: 14, color: COLORS.gray }}>de {limitCount === 99999 ? "∞" : limitCount} gerações</span>
+                    {usedCount} <span style={{ fontSize: 14, color: COLORS.gray }}>de {limitCount === 99999 ? "âˆž" : limitCount} geraÃ§Ãµes</span>
                   </div>
                 </div>
                 <div style={{ width: 160 }}>
                   <div style={{ fontSize: 12, color: COLORS.gray, textAlign: "right", marginBottom: 6 }}>
-                    {remaining === "∞" ? "Ilimitado" : `${remaining} restantes`}
+                    {remaining === "âˆž" ? "Ilimitado" : `${remaining} restantes`}
                   </div>
                   <div className="usage-bar">
                     <div className="usage-fill" style={{ width: `${usagePct}%` }} />
@@ -918,7 +918,7 @@ function AppDashboard({ user, onLogout }) {
 
               {/* Module grid 2x2 */}
               <div style={{ fontSize: 12, color: COLORS.gray, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16 }}>
-                Módulos disponíveis
+                MÃ³dulos disponÃ­veis
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
                 {MODULES.map(mod => (
@@ -950,7 +950,7 @@ function AppDashboard({ user, onLogout }) {
                         }}>{tool.name}</span>
                       ))}
                     </div>
-                    <div style={{ marginTop: 16, fontSize: 12, color: mod.color }}>Abrir módulo →</div>
+                    <div style={{ marginTop: 16, fontSize: 12, color: mod.color }}>Abrir mÃ³dulo â†’</div>
                   </div>
                 ))}
               </div>
@@ -965,16 +965,16 @@ function AppDashboard({ user, onLogout }) {
                   style={{ background: "transparent", color: COLORS.gray, fontSize: 13, padding: 0 }}
                   onMouseEnter={e => e.target.style.color = COLORS.white}
                   onMouseLeave={e => e.target.style.color = COLORS.gray}>
-                  ← Dashboard
+                  â† Dashboard
                 </button>
                 <div style={{ width: 1, height: 16, background: "rgba(201,168,76,0.2)" }} />
                 <div style={{ fontSize: 14, color: COLORS.grayLight }}>{currentModule?.label}</div>
               </div>
 
               <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 28, fontWeight: 300, marginBottom: 8 }}>
-                Módulo de <em style={{ color: COLORS.gold }}>{currentModule?.label}</em>
+                MÃ³dulo de <em style={{ color: COLORS.gold }}>{currentModule?.label}</em>
               </h2>
-              <p style={{ color: COLORS.gray, fontSize: 14, marginBottom: 32 }}>Selecione uma ferramenta para começar a gerar</p>
+              <p style={{ color: COLORS.gray, fontSize: 14, marginBottom: 32 }}>Selecione uma ferramenta para comeÃ§ar a gerar</p>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 20 }}>
                 {currentModule?.tools.map(tool => (
@@ -984,7 +984,7 @@ function AppDashboard({ user, onLogout }) {
                     </div>
                     <div style={{ fontSize: 16, fontWeight: 500, marginBottom: 8 }}>{tool.name}</div>
                     <div style={{ fontSize: 13, color: COLORS.gray, lineHeight: 1.6 }}>{tool.desc}</div>
-                    <div style={{ marginTop: 20, fontSize: 12, color: COLORS.gold }}>Usar ferramenta →</div>
+                    <div style={{ marginTop: 20, fontSize: 12, color: COLORS.gold }}>Usar ferramenta â†’</div>
                   </div>
                 ))}
               </div>
@@ -999,7 +999,7 @@ function AppDashboard({ user, onLogout }) {
                   style={{ background: "transparent", color: COLORS.gray, fontSize: 13, padding: 0 }}
                   onMouseEnter={e => e.target.style.color = COLORS.white}
                   onMouseLeave={e => e.target.style.color = COLORS.gray}>
-                  ← Voltar
+                  â† Voltar
                 </button>
                 <div style={{ width: 1, height: 16, background: "rgba(201,168,76,0.2)" }} />
                 <div style={{ fontSize: 14, color: COLORS.grayLight }}>{activeTool.name}</div>
@@ -1013,18 +1013,18 @@ function AppDashboard({ user, onLogout }) {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
                 <div>
                   <label style={{ fontSize: 12, color: COLORS.gray, letterSpacing: 1, textTransform: "uppercase", display: "block", marginBottom: 12 }}>
-                    Descreva o que você precisa
+                    Descreva o que vocÃª precisa
                   </label>
                   <textarea
                     value={input}
                     onChange={e => setInput(e.target.value)}
-                    placeholder="Ex: Contrato de prestação de serviços entre empresa X e Y, valor R$ 5.000, prazo 3 meses..."
+                    placeholder="Ex: Contrato de prestaÃ§Ã£o de serviÃ§os entre empresa X e Y, valor R$ 5.000, prazo 3 meses..."
                     rows={8}
                     style={{ resize: "vertical" }}
                   />
                   <button className="btn-gold" onClick={generate} disabled={loading || !input.trim()}
                     style={{ marginTop: 16, width: "100%", opacity: loading || !input.trim() ? 0.6 : 1 }}>
-                    {loading ? "Gerando..." : "✦ Gerar com IA"}
+                    {loading ? "Gerando..." : "âœ¦ Gerar com IA"}
                   </button>
                 </div>
                 <div>
@@ -1032,18 +1032,18 @@ function AppDashboard({ user, onLogout }) {
                     <label style={{ fontSize: 12, color: COLORS.gray, letterSpacing: 1, textTransform: "uppercase" }}>Resultado</label>
                     {result && (
                       <button onClick={copyResult} style={{ background: "transparent", color: COLORS.gold, fontSize: 12, padding: 0 }}>
-                        Copiar ↗
+                        Copiar â†—
                       </button>
                     )}
                   </div>
                   <div className="result-box">
                     {loading ? (
                       <div style={{ display: "flex", alignItems: "center", gap: 12, color: COLORS.gray }}>
-                        <div style={{ animation: "pulse 1.5s ease infinite" }}>✦</div>
-                        Gerando seu conteúdo...
+                        <div style={{ animation: "pulse 1.5s ease infinite" }}>âœ¦</div>
+                        Gerando seu conteÃºdo...
                       </div>
                     ) : result || (
-                      <span style={{ color: COLORS.gray }}>O resultado aparecerá aqui...</span>
+                      <span style={{ color: COLORS.gray }}>O resultado aparecerÃ¡ aqui...</span>
                     )}
                   </div>
                 </div>
@@ -1058,7 +1058,7 @@ function AppDashboard({ user, onLogout }) {
   );
 }
 
-// ── LANDING PAGE ─────────────────────────────────────────────────
+// â”€â”€ LANDING PAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function LandingPage({ onLogin, onRegister }) {
   const [openFaq, setOpenFaq] = useState(null);
   const [scrolled, setScrolled] = useState(false);
@@ -1095,7 +1095,7 @@ function LandingPage({ onLogin, onRegister }) {
             </a>
           ))}
           <button className="btn-outline" onClick={onLogin} style={{ padding: "10px 24px", fontSize: 13 }}>Entrar</button>
-          <button className="btn-gold" onClick={onRegister} style={{ padding: "10px 24px", fontSize: 13 }}>Começar Grátis</button>
+          <button className="btn-gold" onClick={onRegister} style={{ padding: "10px 24px", fontSize: 13 }}>ComeÃ§ar GrÃ¡tis</button>
         </div>
       </nav>
 
@@ -1114,7 +1114,7 @@ function LandingPage({ onLogin, onRegister }) {
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 48px", position: "relative", zIndex: 1 }}>
           <div style={{ maxWidth: 760 }}>
             <div className="tag animate-fadeIn" style={{ animationDelay: "0.2s", opacity: 0 }}>
-              ✦ Plataforma de IA para Empresas
+              âœ¦ Plataforma de IA para Empresas
             </div>
             <h1 className="animate-fadeUp" style={{
               fontFamily: "Cormorant Garamond, serif",
@@ -1122,7 +1122,7 @@ function LandingPage({ onLogin, onRegister }) {
               fontWeight: 300, lineHeight: 1.1, marginBottom: 28,
               animationDelay: "0.3s", opacity: 0,
             }}>
-              Gere conteúdo<br />
+              Gere conteÃºdo<br />
               profissional com<br />
               <em style={{
                 color: COLORS.gold,
@@ -1131,20 +1131,20 @@ function LandingPage({ onLogin, onRegister }) {
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 animation: "shimmer 3s linear infinite",
-              }}>inteligência artificial</em>
+              }}>inteligÃªncia artificial</em>
             </h1>
             <p className="animate-fadeUp" style={{
               color: COLORS.gray, fontSize: 18, lineHeight: 1.8, marginBottom: 48, maxWidth: 560,
               animationDelay: "0.5s", opacity: 0,
             }}>
-              16 ferramentas especializadas em documentos, dados, produtividade e conteúdo. Resultados profissionais em segundos.
+              16 ferramentas especializadas em documentos, dados, produtividade e conteÃºdo. Resultados profissionais em segundos.
             </p>
             <div className="animate-fadeUp" style={{ display: "flex", gap: 16, animationDelay: "0.7s", opacity: 0 }}>
               <button className="btn-gold" onClick={onRegister} style={{ fontSize: 15, padding: "16px 40px" }}>
-                Começar Gratuitamente
+                ComeÃ§ar Gratuitamente
               </button>
               <button className="btn-outline" onClick={onLogin} style={{ fontSize: 15, padding: "16px 40px" }}>
-                Já tenho conta
+                JÃ¡ tenho conta
               </button>
             </div>
 
@@ -1155,8 +1155,8 @@ function LandingPage({ onLogin, onRegister }) {
             }}>
               {[
                 { n: "16", label: "Ferramentas de IA" },
-                { n: "4", label: "Módulos especializados" },
-                { n: "< 30s", label: "Tempo de geração" },
+                { n: "4", label: "MÃ³dulos especializados" },
+                { n: "< 30s", label: "Tempo de geraÃ§Ã£o" },
               ].map(stat => (
                 <div key={stat.n}>
                   <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 36, fontWeight: 300, color: COLORS.gold }}>{stat.n}</div>
@@ -1186,7 +1186,7 @@ function LandingPage({ onLogin, onRegister }) {
               Do zero ao resultado<br /><em style={{ color: COLORS.gold }}>em 4 passos simples</em>
             </h2>
             <p className="reveal" style={{ color: COLORS.gray, fontSize: 16, maxWidth: 480, margin: "0 auto" }}>
-              Sem curva de aprendizado. Sem complicação. Você começa a usar em minutos.
+              Sem curva de aprendizado. Sem complicaÃ§Ã£o. VocÃª comeÃ§a a usar em minutos.
             </p>
           </div>
 
@@ -1242,7 +1242,7 @@ function LandingPage({ onLogin, onRegister }) {
           {/* CTA inline */}
           <div style={{ textAlign: "center", marginTop: 72 }}>
             <button className="btn-gold reveal" onClick={onRegister} style={{ fontSize: 15, padding: "16px 48px" }}>
-              Experimentar Agora — É Grátis
+              Experimentar Agora â€” Ã‰ GrÃ¡tis
             </button>
           </div>
         </div>
@@ -1255,7 +1255,7 @@ function LandingPage({ onLogin, onRegister }) {
             <div className="tag reveal">Ferramentas</div>
             <h2 className="section-title reveal">16 ferramentas para<br /><em style={{ color: COLORS.gold }}>cada necessidade</em></h2>
             <div className="gold-line reveal" />
-            <p className="section-subtitle reveal">Módulos especializados para cobrir todas as áreas estratégicas do seu negócio.</p>
+            <p className="section-subtitle reveal">MÃ³dulos especializados para cobrir todas as Ã¡reas estratÃ©gicas do seu negÃ³cio.</p>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 24 }}>
@@ -1293,13 +1293,13 @@ function LandingPage({ onLogin, onRegister }) {
           <div style={{ textAlign: "center", marginBottom: 64 }}>
             <div className="tag reveal">Depoimentos</div>
             <h2 className="section-title reveal" style={{ textAlign: "center" }}>
-              O que nossos clientes<br /><em style={{ color: COLORS.gold }}>estão dizendo</em>
+              O que nossos clientes<br /><em style={{ color: COLORS.gold }}>estÃ£o dizendo</em>
             </h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
             {TESTIMONIALS.map((t, i) => (
               <div key={i} className="card reveal" style={{ transitionDelay: `${i * 0.15}s` }}>
-                <div style={{ color: COLORS.gold, fontSize: 24, marginBottom: 16, letterSpacing: -2 }}>✦✦✦✦✦</div>
+                <div style={{ color: COLORS.gold, fontSize: 24, marginBottom: 16, letterSpacing: -2 }}>âœ¦âœ¦âœ¦âœ¦âœ¦</div>
                 <p style={{ fontSize: 15, color: COLORS.grayLight, lineHeight: 1.8, marginBottom: 24, fontStyle: "italic" }}>
                   "{t.text}"
                 </p>
@@ -1345,8 +1345,8 @@ function LandingPage({ onLogin, onRegister }) {
                   <tr key={i} style={{ borderTop: `1px solid rgba(201,168,76,0.08)`, background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)" }}>
                     <td style={{ padding: "14px 24px", fontSize: 14, color: COLORS.grayLight }}>{row.feature}</td>
                     <td style={{ padding: "14px 24px", textAlign: "center", fontSize: 14, color: COLORS.gold, fontWeight: 600 }}>{row.arcane}</td>
-                    <td style={{ padding: "14px 24px", textAlign: "center", fontSize: 14, color: row.chatgpt === "✗" ? "#ff8080" : COLORS.gray }}>{row.chatgpt}</td>
-                    <td style={{ padding: "14px 24px", textAlign: "center", fontSize: 14, color: row.concorrente === "✗" ? "#ff8080" : COLORS.gray }}>{row.concorrente}</td>
+                    <td style={{ padding: "14px 24px", textAlign: "center", fontSize: 14, color: row.chatgpt === "âœ—" ? "#ff8080" : COLORS.gray }}>{row.chatgpt}</td>
+                    <td style={{ padding: "14px 24px", textAlign: "center", fontSize: 14, color: row.concorrente === "âœ—" ? "#ff8080" : COLORS.gray }}>{row.concorrente}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1360,7 +1360,7 @@ function LandingPage({ onLogin, onRegister }) {
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 64 }}>
             <div className="tag reveal">Planos</div>
-            <h2 className="section-title reveal" style={{ textAlign: "center" }}>Escolha o plano<br /><em style={{ color: COLORS.gold }}>ideal para você</em></h2>
+            <h2 className="section-title reveal" style={{ textAlign: "center" }}>Escolha o plano<br /><em style={{ color: COLORS.gold }}>ideal para vocÃª</em></h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 24 }}>
             {PLANS.map((plan, i) => (
@@ -1380,19 +1380,19 @@ function LandingPage({ onLogin, onRegister }) {
                     color: COLORS.navy, fontSize: 11, fontWeight: 700,
                     padding: "4px 16px", borderRadius: 20, letterSpacing: 1,
                     whiteSpace: "nowrap",
-                  }}>⭐ RECOMENDADO</div>
+                  }}>â­ RECOMENDADO</div>
                 )}
                 <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>{plan.name}</div>
                 <div style={{ marginBottom: 4 }}>
                   <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 44, fontWeight: 300, color: plan.highlight ? COLORS.gold : COLORS.white }}>{plan.price}</span>
                   <span style={{ color: COLORS.gray, fontSize: 14 }}>{plan.period}</span>
                 </div>
-                <div style={{ color: COLORS.gray, fontSize: 13, marginBottom: 24 }}>{plan.gens} · {plan.users}</div>
+                <div style={{ color: COLORS.gray, fontSize: 13, marginBottom: 24 }}>{plan.gens} Â· {plan.users}</div>
                 <div style={{ height: 1, background: "rgba(201,168,76,0.15)", marginBottom: 24 }} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 32 }}>
                   {plan.features.map((f, fi) => (
                     <div key={fi} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: COLORS.grayLight }}>
-                      <span style={{ color: COLORS.gold, fontSize: 10 }}>✓</span> {f}
+                      <span style={{ color: COLORS.gold, fontSize: 10 }}>âœ“</span> {f}
                     </div>
                   ))}
                 </div>
@@ -1413,11 +1413,11 @@ function LandingPage({ onLogin, onRegister }) {
                   onMouseEnter={e => { if (!plan.highlight) e.target.style.background = "rgba(201,168,76,0.1)"; }}
                   onMouseLeave={e => { if (!plan.highlight) e.target.style.background = "transparent"; }}
                 >
-                  {plan.id === "free" ? "Começar Grátis" : "💳 Assinar com Mercado Pago"}
+                  {plan.id === "free" ? "ComeÃ§ar GrÃ¡tis" : "ðŸ’³ Assinar com Mercado Pago"}
                 </button>
                 {plan.id !== "free" && (
                   <div style={{ textAlign: "center", marginTop: 10, fontSize: 11, color: COLORS.gray }}>
-                    PIX · Cartão de crédito · Boleto
+                    PIX Â· CartÃ£o de crÃ©dito Â· Boleto
                   </div>
                 )}
               </div>
@@ -1449,7 +1449,7 @@ function LandingPage({ onLogin, onRegister }) {
                 }}>
                   {faq.q}
                   <span style={{ color: COLORS.gold, fontSize: 20, lineHeight: 1, flexShrink: 0, marginLeft: 16 }}>
-                    {openFaq === i ? "−" : "+"}
+                    {openFaq === i ? "âˆ’" : "+"}
                   </span>
                 </button>
                 {openFaq === i && (
@@ -1477,13 +1477,13 @@ function LandingPage({ onLogin, onRegister }) {
             Pronto para transformar<br />sua <em style={{ color: COLORS.gold }}>produtividade?</em>
           </div>
           <p className="reveal" style={{ color: COLORS.gray, fontSize: 16, marginBottom: 40 }}>
-            Junte-se a centenas de empresas que já usam o Arcane para trabalhar de forma mais inteligente.
+            Junte-se a centenas de empresas que jÃ¡ usam o Arcane para trabalhar de forma mais inteligente.
           </p>
           <button className="btn-gold reveal" onClick={onRegister} style={{ fontSize: 16, padding: "18px 56px" }}>
-            Criar Conta Grátis Agora
+            Criar Conta GrÃ¡tis Agora
           </button>
           <p className="reveal" style={{ color: COLORS.gray, fontSize: 13, marginTop: 16 }}>
-            Sem cartão de crédito · Cancele quando quiser
+            Sem cartÃ£o de crÃ©dito Â· Cancele quando quiser
           </p>
         </div>
       </section>
@@ -1497,7 +1497,7 @@ function LandingPage({ onLogin, onRegister }) {
       }}>
         <Logo size={18} />
         <div style={{ color: COLORS.gray, fontSize: 13 }}>
-          © 2026 Arcane. Todos os direitos reservados.
+          Â© 2026 Arcane. Todos os direitos reservados.
         </div>
         <div style={{ display: "flex", gap: 24 }}>
           {["Privacidade", "Termos", "Contato"].map(item => (
@@ -1513,7 +1513,7 @@ function LandingPage({ onLogin, onRegister }) {
   );
 }
 
-// ── APP ROOT ──────────────────────────────────────────────────────
+// â”€â”€ APP ROOT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function App() {
   const [screen, setScreen] = useState("landing");
   const [user, setUser] = useState(null);
