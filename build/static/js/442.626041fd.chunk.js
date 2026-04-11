@@ -1,0 +1,2 @@
+"use strict";(globalThis.webpackChunkarcane_workspace=globalThis.webpackChunkarcane_workspace||[]).push([[442],{442(s){s.exports=import("https://cdn.sheetjs.com/xlsx-0.20.1/package/xlsx.mjs")}}]);
+//# sourceMappingURL=442.626041fd.chunk.js.map
