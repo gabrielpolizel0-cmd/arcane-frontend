@@ -379,8 +379,16 @@ function Dashboard({ user, onLogout }) {
       data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erro ao processar");
       setResult(data.output || "");
-      setProfile(p => ({ ...p, generations_used: data.used || (p.generations_used+1) }));
-      await loadHistory();
+      setProfile(p => ({ ...p, generations_used: data.used || (p.generations_used+1) }));// Salva no Supabase
+await supabase.from("generations").insert({
+  user_id: user.id,
+  tool: tool.id,
+  module: modId,
+  input: input,
+  result: data.output || "",
+});
+await supabase.from("profiles").update({ generations_used: (profile.generations_used || 0) + 1 }).eq("id", user.id);
+await loadHistory();
     } catch(e) { setToast(e.message); }
     setLoading(false);
   };
