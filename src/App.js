@@ -510,7 +510,7 @@ function Landing({ onLogin, onRegister }) {
   return (
     <div style={{ background: "linear-gradient(to bottom,#030303,#0a0a0a)", minHeight: "100vh", overflowX: "hidden" }}>
       <style>{G}</style>
-      <ThreeBackground />
+      <HeroBackground />
 
       {/* ── HEADER ── */}
       <header className="glass-panel" style={{
@@ -927,7 +927,7 @@ function AuthPage({ mode, onSuccess, onSwitch }) {
   return (
     <div className="auth-split" style={{ minHeight: "100vh", display: "flex", background: "linear-gradient(to bottom,#030303,#0a0a0a)" }}>
       <style>{G}</style>
-      <ThreeBackground />
+      <HeroBackground />
 
       {/* Left panel */}
       <div className="auth-left" style={{ width: "45%", position: "relative", zIndex: 10, display: "flex", flexDirection: "column", justifyContent: "center", padding: "80px 64px" }}>
