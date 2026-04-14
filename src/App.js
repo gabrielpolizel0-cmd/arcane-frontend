@@ -1633,4 +1633,4 @@ export default function App() {
   if (page === "login") return <AuthPage mode="login" onSuccess={u => { setUser(u); setPage("app"); }} onSwitch={() => setPage("register")} />;
   if (page === "register") return <AuthPage mode="register" onSuccess={u => { setUser(u); setPage("app"); }} onSwitch={() => setPage("login")} />;
   return <Landing onLogin={() => setPage("login")} onRegister={() => setPage("register")} />;
-}
+} 
