@@ -465,110 +465,36 @@ function PlanTag({ plan }) {
 }
 
 // ── THREE.JS HERO BACKGROUND ──
-function ThreeBackground() {
-  const canvasRef = useRef(null);
-  const animationRef = useRef(null);
-
+function HeroBackground() {
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    // Dynamic import Three.js from CDN
+    if (window.UnicornStudio) return;
+    window.UnicornStudio = { isInitialized: false };
     const script = document.createElement("script");
-    script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+    script.src = "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.30/dist/unicornStudio.umd.js";
     script.onload = () => {
-      const THREE = window.THREE;
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-      camera.position.set(0, 0, 18);
-      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-      const globeGroup = new THREE.Group();
-      scene.add(globeGroup);
-
-      // Core wireframe sphere
-      const geometry = new THREE.IcosahedronGeometry(5, 2);
-      const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0x0f4c81, wireframe: true, transparent: true, opacity: 0.8 });
-      const coreSphere = new THREE.Mesh(geometry, wireframeMaterial);
-      globeGroup.add(coreSphere);
-
-      // Shield with fresnel effect
-      const shieldGeometry = new THREE.IcosahedronGeometry(5.15, 4);
-      const vertexShader = `
-        varying vec3 vNormal; varying vec3 vPosition;
-        void main() {
-          vNormal = normalize(normalMatrix * normal);
-          vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `;
-      const fragmentShader = `
-        varying vec3 vNormal; varying vec3 vPosition;
-        void main() {
-          vec3 viewDirection = normalize(-vPosition);
-          float fresnel = clamp(1.0 - dot(viewDirection, vNormal), 0.0, 1.0);
-          fresnel = pow(fresnel, 6.0);
-          vec3 rimColor = vec3(0.1, 0.4, 0.8);
-          gl_FragColor = vec4(rimColor, fresnel * 0.9);
-        }
-      `;
-      const shieldMaterial = new THREE.ShaderMaterial({ vertexShader, fragmentShader, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
-      globeGroup.add(new THREE.Mesh(shieldGeometry, shieldMaterial));
-
-      // Particles
-      const particleCount = 150;
-      const particleGeometry = new THREE.BufferGeometry();
-      const particlePositions = new Float32Array(particleCount * 3);
-      for (let i = 0; i < particleCount; i++) {
-        const r = 6.5 + Math.random() * 7.5;
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos((Math.random() * 2) - 1);
-        particlePositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-        particlePositions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-        particlePositions[i * 3 + 2] = r * Math.cos(phi);
+      if (!window.UnicornStudio.isInitialized) {
+        window.UnicornStudio.init();
+        window.UnicornStudio.isInitialized = true;
       }
-      particleGeometry.setAttribute("position", new THREE.BufferAttribute(particlePositions, 3));
-      const particles = new THREE.Points(particleGeometry, new THREE.PointsMaterial({ size: 0.04, color: 0x00e5ff, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending }));
-      globeGroup.add(particles);
-
-      const clock = new THREE.Clock();
-      function animate() {
-        const t = clock.getElapsedTime();
-        globeGroup.rotation.y = t * 0.05;
-        globeGroup.rotation.x = t * 0.02;
-        const s = 1 + Math.sin(t * 0.5) * 0.015;
-        globeGroup.scale.set(s, s, s);
-        particles.rotation.y = t * -0.02;
-        particles.rotation.z = t * 0.01;
-        renderer.render(scene, camera);
-        animationRef.current = requestAnimationFrame(animate);
-      }
-      animate();
-
-      const handleResize = () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      };
-      window.addEventListener("resize", handleResize);
-      canvas._cleanup = () => {
-        window.removeEventListener("resize", handleResize);
-        if (animationRef.current) cancelAnimationFrame(animationRef.current);
-        renderer.dispose();
-      };
     };
     document.head.appendChild(script);
-
-    return () => {
-      if (canvas._cleanup) canvas._cleanup();
-    };
   }, []);
 
-  return <canvas ref={canvasRef} id="webgl-canvas" />;
+  return (
+    <div
+      data-us-project="N9XzvQXu7fA5SY2ewADJ"
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        zIndex: -1,
+        pointerEvents: "none",
+      }}
+    />
+  );
 }
-
 // ── LANDING PAGE ──
 function Landing({ onLogin, onRegister }) {
   const [openFaq, setOpenFaq] = useState(null);
